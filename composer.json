@@ -1,0 +1,57 @@
+{
+    "name": "italystrap/simple-cache",
+    "description": "Data cleaner for PHP",
+    "keywords": [],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "overclokk",
+            "email": "info@overclokk.net",
+            "homepage": "https://www.italystrap.com",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php" : ">=7.0",
+        "psr/simple-cache": "^1.0"
+    },
+    "require-dev": {
+        "lucatume/wp-browser": "~2.2",
+        "codeception/c3": "2.*",
+        "lucatume/function-mocker-le": "^1.0",
+        "italystrap/debug": "~2.0",
+        "wp-coding-standards/wpcs": "^2.1",
+        "phpcompatibility/php-compatibility": "^9.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+        "phpstan/phpstan": "^0.11.16",
+        "szepeviktor/phpstan-wordpress": "^0.3.0",
+        "phpbench/phpbench": "@dev",
+        "infection/infection": "^0.15.3",
+        "vimeo/psalm": "^3.9",
+        "phpmetrics/phpmetrics": "^2.5",
+        "roave/doctrine-simplecache": "^2.3",
+        "symfony/cache": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ItalyStrap\\SimpleCache\\": "src/"
+        }
+    },
+    "provide": {
+        "psr/simple-cache-implementation": "1.0"
+    },
+    "scripts": {
+        "check": [
+            ".\\vendor\\bin\\phpcs -p --standard=PHPCompatibility src"
+        ],
+        "test": [
+            "test"
+        ]
+    },
+    "support"    : {
+        "issues": "https://github.com/ItalyStrap/cleaner/issues",
+        "source": "https://github.com/ItalyStrap/cleaner"
+    }
+}

@@ -1,0 +1,7 @@
+/vendor/
+
+/_others/
+
+*.local
+codeception.yml
+*.lock
