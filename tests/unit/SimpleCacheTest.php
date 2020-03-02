@@ -6,6 +6,7 @@ namespace ItalyStrap\Tests;
 use Codeception\Test\Unit;
 use ItalyStrap\SimpleCache\Exceptions\InvalidArgumentSimpleCacheException;
 use Psr\SimpleCache\InvalidArgumentException;
+use Traversable;
 
 class SimpleCacheTest extends Unit {
 
@@ -213,7 +214,7 @@ class SimpleCacheTest extends Unit {
 				'key'
 			],
 			'int key'	=> [
-				'key'
+				0
 			],
 		];
 	}
@@ -252,6 +253,32 @@ class SimpleCacheTest extends Unit {
 	 * @test
 	 */
 	public function itShouldGetMultipleValuesIfKeyIsTraversable() {
+		$traversable = new class implements \IteratorAggregate {
+			public $key = 'key';
+			public $key2 = 'key2';
+
+			/**
+			 * @inheritDoc
+			 */
+			public function getIterator() {
+				return new \ArrayIterator($this);
+			}
+		};
+
+
+		$this->store = [
+			'key'	=> 'some-other-value',
+			'key2'	=> 'value 2',
+		];
+		$sut = $this->getInstance();
+		$multiple = $sut->getMultiple($traversable);
+		$this->assertSame($this->store, $multiple, '');
+	}
+
+	/**
+	 * @test
+	 */
+	public function itShouldGetMultipleValuesIfKeyIsArrayObject() {
 		$this->store = [
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',

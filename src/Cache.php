@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace ItalyStrap\SimpleCache;
 
+use ArrayObject;
 use DateInterval;
 use DateTime;
 use Exception;
 use ItalyStrap\SimpleCache\Exceptions\InvalidArgumentSimpleCacheException;
 use Psr\SimpleCache\CacheInterface;
-use Psr\SimpleCache\InvalidArgumentException;
 use Traversable;
 use function array_keys;
 use function array_map;
@@ -17,6 +17,7 @@ use function delete_transient;
 use function get_class;
 use function get_transient;
 use function gettype;
+use function intval;
 use function is_array;
 use function is_object;
 use function is_string;
@@ -37,7 +38,6 @@ class Cache implements CacheInterface {
 	 * @inheritDoc
 	 */
 	public function has( $key ) {
-		$this->assertKeyIsValid( $key );
 		return boolval( $this->get( $key ) );
 	}
 
@@ -73,7 +73,7 @@ class Cache implements CacheInterface {
 			$ttl = $this->convertDateIntervalToInteger($ttl);
 		}
 
-		return set_transient( $key, $value, $ttl );
+		return set_transient( $key, $value, intval($ttl) );
 	}
 
 	/**
@@ -89,7 +89,6 @@ class Cache implements CacheInterface {
 	 * @inheritDoc
 	 */
 	public function getMultiple( $keys, $default = null ) {
-
 		$keys = $this->assertKeysAreValid( $keys );
 
 		$data = [];
@@ -105,13 +104,7 @@ class Cache implements CacheInterface {
 	 * @inheritDoc
 	 */
 	public function setMultiple( $values, $ttl = null ): bool {
-
-		if (!$values instanceof Traversable && !is_array($values)) {
-			throw new InvalidArgumentSimpleCacheException( sprintf(
-				'The $values must be a Traversable, %s given',
-				gettype( $values )
-			), 0 );
-		}
+		$values = $this->toArray($values, 'values');
 
 		$success = true;
 		foreach ( $values as $key => $value ) {
@@ -130,6 +123,7 @@ class Cache implements CacheInterface {
 	public function deleteMultiple( $keys ): bool {
 		$keys = $this->assertKeysAreValid( $keys );
 		$success = true;
+		/** @var string $key */
 		foreach ( $keys as $key ) {
 			if ( $this->delete( $key ) ) {
 				continue;
@@ -141,15 +135,17 @@ class Cache implements CacheInterface {
 	}
 
 	/**
+	 * @psalm-suppress InvalidThrow
 	 * @inheritDoc
-	 * @throws InvalidArgumentException
+	 * @throws \Psr\SimpleCache\InvalidArgumentException
 	 */
 	public function clear(): bool {
 		return $this->deleteMultiple( array_keys( $this->data ) );
 	}
 
 	/**
-	 * @param string $key
+	 * @psalm-suppress ReservedWord
+	 * @param mixed $key
 	 */
 	private function assertKeyIsValid( $key ): void {
 		if ( ! is_string( $key ) ) {
@@ -180,24 +176,41 @@ class Cache implements CacheInterface {
 	}
 
 	/**
-	 * @param array $keys
-	 * @return array
+	 * @param array|iterable $keys
+	 * @return array<string>
 	 */
 	private function assertKeysAreValid( $keys ): array {
-		if ( $keys instanceof Traversable ) {
-			$keys = iterator_to_array( $keys, false );
-		}
-
-		if ( ! is_array( $keys ) ) {
-			throw new InvalidArgumentSimpleCacheException(
-				sprintf(
-					'Cache keys must be array or Traversable, "%s" given',
-					is_object( $keys ) ? get_class( $keys ) : gettype( $keys )
-				)
-			);
-		}
-
+		$keys = $this->toArray($keys, 'keys');
 		array_map( [$this, 'assertKeyIsValid'], $keys );
 		return $keys;
+	}
+
+	/**
+	 * @param iterable $other
+	 * @param string $type
+	 * @return array
+	 * @author Sebastian Bergmann PHPUnit
+	 */
+	private function toArray($other, $type = 'keys'): array
+	{
+		if ( is_array($other)) {
+			return $other;
+		}
+
+		if ($other instanceof ArrayObject) {
+			return $other->getArrayCopy();
+		}
+
+		if ($other instanceof Traversable) {
+			return iterator_to_array($other);
+		}
+
+		throw new InvalidArgumentSimpleCacheException(
+			sprintf(
+				'Cache %s must be array or Traversable, "%s" given',
+				$type,
+				is_object( $other ) ? get_class( $other ) : gettype( $other )
+			)
+		);
 	}
 }
