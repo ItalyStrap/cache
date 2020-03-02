@@ -65,6 +65,7 @@ before_install:
 
 install:
   - composer install --prefer-dist --ignore-platform-reqs
+  - sudo chmod -R 777 /tests/_output
   # install WordPress
   - cd $WP_FOLDER
   - wp core download --version=$WP_VERSION
@@ -74,11 +75,11 @@ install:
   # update WordPress database to avoid prompts
   - wp core update-db
   # copy the plugin in the WordPress plugin folder
-  - cp -r $TRAVIS_BUILD_DIR $WP_FOLDER/wp-content/plugins/cleaner
+  - cp -r $TRAVIS_BUILD_DIR $WP_FOLDER/wp-content/plugins/cache
   # show the plugins folder contents to make sure the plugin folder is there
   - ls $WP_FOLDER/wp-content/plugins
   # activate the plugin
-  - wp plugin activate cleaner
+  - wp plugin activate cache
   # make sure the plugin is active on the site
   - wp plugin list --status=active
   # export a dump of the just installed database to the _data folder
