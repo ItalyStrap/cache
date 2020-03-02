@@ -25,8 +25,8 @@ use function iterator_to_array;
 use function set_transient;
 use function sprintf;
 
-class SimpleCache implements PsrSimpleCacheInterface
-{
+class SimpleCache implements PsrSimpleCacheInterface {
+
 
 	/**
 	 * Data value of the transient
