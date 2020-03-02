@@ -1,6 +1,9 @@
 {
   "bootstrap": "index.php",
   "php_disable_ini": true,
+  "php_config": {
+    "extension": [ "json.so" ]
+  },
   "path": "tests/benchmarks",
   "reports": {
     "performance": {

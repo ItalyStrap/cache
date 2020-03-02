@@ -48,6 +48,9 @@
         ],
         "test": [
             "test"
+        ],
+        "metrics": [
+            "vendor/bin/phpmetrics --report-html='./tests/_output/report' ./src"
         ]
     },
     "support"    : {

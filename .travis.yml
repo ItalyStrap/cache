@@ -109,3 +109,4 @@ script:
   - vendor/bin/psalm
   - codecept run wpunit && codecept run unit --coverage-text
   - vendor/bin/infection
+  - vendor/bin/phpbench run --report=performance
