@@ -1,15 +1,27 @@
 <?php
+declare(strict_types=1);
 
-class IntegrationTest extends \Codeception\TestCase\WPTestCase {
+namespace ItalyStrap\Tests;
+
+use Codeception\TestCase\WPTestCase;
+use ItalyStrap\SimpleCache\Cache;
+use WpunitTester;
+
+class IntegrationTest extends WPTestCase {
 
 	/**
-	 * @var \WpunitTester
+	 * @var WpunitTester
 	 */
 	protected $tester;
+	/**
+	 * @var Cache
+	 */
+	private $simple_cache;
 
 	public function setUp(): void {
 		// Before...
 		parent::setUp();
+		$this->simple_cache = new Cache();
 
 		// Your set up methods here.
 	}
@@ -21,27 +33,28 @@ class IntegrationTest extends \Codeception\TestCase\WPTestCase {
 		parent::tearDown();
 	}
 
-	// Tests
-	public function test_it_works() {
-		$transient = \set_transient( 'key', false );
-
-		codecept_debug( \json_encode(\get_transient('key')) );
-		codecept_debug( \json_encode(\get_transient('key-2')) );
+	/**
+	 * @test
+	 */
+	public function setTransient() {
+		$this->simple_cache->set( 'key', 'value' );
+		$this->assertSame('value', \get_transient('key'), '');
 	}
 
-	// Tests
-	public function test_it_workspo() {
-		$transient = \set_transient( 'key', 0 );
-
-		codecept_debug( \json_encode(\get_transient('key')) );
-		codecept_debug( \json_encode(\get_transient('key-2')) );
+	/**
+	 * @test
+	 */
+	public function getTransient() {
+		\set_transient( 'key', 'value' );
+		$this->assertSame('value', $this->simple_cache->get('key'), '');
 	}
 
-	// Tests
-	public function test_it_workspofgdf() {
-		$transient = \set_transient( 'key', '' );
-
-		codecept_debug( \json_encode(\get_transient('key')) );
-		codecept_debug( \json_encode(\get_transient('key-2')) );
+	/**
+	 * @test
+	 */
+	public function deleteTransient() {
+		\set_transient( 'key', 'value' );
+		$this->simple_cache->delete('key');
+		$this->assertFalse(\get_transient('key'), '');
 	}
 }
