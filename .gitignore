@@ -5,4 +5,4 @@
 *.local
 codeception.yml
 *.lock
-infection.json
+infection.json.dist
