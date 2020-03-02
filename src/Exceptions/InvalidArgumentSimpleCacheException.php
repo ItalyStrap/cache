@@ -6,7 +6,7 @@ namespace ItalyStrap\SimpleCache\Exceptions;
 use InvalidArgumentException;
 use Psr\SimpleCache\InvalidArgumentException as PsrInvalidArgumentException;
 
-class InvalidArgumentSimpleCacheException extends InvalidArgumentException implements PsrInvalidArgumentException
-{
+class InvalidArgumentSimpleCacheException extends InvalidArgumentException implements PsrInvalidArgumentException {
+
 
 }
