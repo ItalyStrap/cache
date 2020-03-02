@@ -1,6 +1,6 @@
 {
     "name": "italystrap/cache",
-    "description": "Data cleaner for PHP",
+    "description": "Simple PSR-16 cache implementations for WordPress transient the OOP way",
     "keywords": [],
     "type": "library",
     "license": "MIT",
