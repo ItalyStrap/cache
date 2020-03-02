@@ -13,15 +13,17 @@ class SimpleCacheBench {
 	private $cache;
 	private $store = [];
 
-	public function init()
-	{
+	public function init() {
+		// phpcs:ignore
 		\tad\FunctionMockerLe\define('set_transient', function ($key, $value, $ttl) {
 			$this->store[ $key ] = $value;
 			return true;
 		});
+		// phpcs:ignore
 		\tad\FunctionMockerLe\define('get_transient', function ($key) {
 			return $this->store[$key] ?? false;
 		});
+		// phpcs:ignore
 		\tad\FunctionMockerLe\define('delete_transient', function ($key) {
 			unset($this->store[$key]);
 			return true;
