@@ -65,7 +65,7 @@ before_install:
 
 install:
   - composer install --prefer-dist --ignore-platform-reqs
-  - sudo chmod -R 777 /tests/_output
+  - sudo chmod -R 777 $TRAVIS_BUILD_DIR/tests/_output
   # install WordPress
   - cd $WP_FOLDER
   - wp core download --version=$WP_VERSION
