@@ -13,4 +13,13 @@
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
+    <issueHandlers>
+        <UndefinedFunction>
+            <errorLevel type="suppress">
+                <referencedFunction name="get_transient"/>
+                <referencedFunction name="set_transient"/>
+                <referencedFunction name="delete_transient"/>
+            </errorLevel>
+        </UndefinedFunction>
+    </issueHandlers>
 </psalm>
