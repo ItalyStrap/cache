@@ -29,13 +29,13 @@ Domain Path: Domain Path
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-require( __DIR__ . '/vendor/autoload.php' );
+require __DIR__ . '/vendor/autoload.php';
 
 /**
  * debug_example
  */
-function cache_example() {
-
-}
-
-add_action( 'wp_footer', 'cache_example' );
+//function cache_example() {
+//
+//}
+//
+//add_action( 'wp_footer', 'cache_example' );

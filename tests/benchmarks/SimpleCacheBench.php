@@ -1,0 +1,86 @@
+<?php
+declare(strict_types=1);
+
+namespace ItalyStrap\Tests\Benchmark;
+
+use ItalyStrap\SimpleCache\Cache;
+
+/**
+ * @BeforeMethods({"init"})
+ */
+class SimpleCacheBench {
+
+	private $cache;
+	private $store = [];
+
+	public function init()
+	{
+		\tad\FunctionMockerLe\define('set_transient', function ($key, $value, $ttl) {
+			$this->store[ $key ] = $value;
+			return true;
+		});
+		\tad\FunctionMockerLe\define('get_transient', function ($key) {
+			return $this->store[$key] ?? false;
+		});
+		\tad\FunctionMockerLe\define('delete_transient', function ($key) {
+			unset($this->store[$key]);
+			return true;
+		});
+
+		$this->cache = new Cache();
+	}
+
+	/**
+	 * @Warmup(2)
+	 * @Revs(1000)
+	 * @Iterations(5)
+	 */
+	public function benchSet() {
+		$this->cache->set('key', 'value', 10);
+	}
+
+	/**
+	 * @Warmup(2)
+	 * @Revs(1000)
+	 * @Iterations(5)
+	 */
+	public function benchSetTransient() {
+		set_transient('key', 'value', 10);
+	}
+
+	/**
+	 * @Warmup(2)
+	 * @Revs(1000)
+	 * @Iterations(5)
+	 */
+	public function benchGet() {
+		$this->cache->get('key');
+	}
+
+	/**
+	 * @Warmup(2)
+	 * @Revs(1000)
+	 * @Iterations(5)
+	 */
+	public function benchGetTransient() {
+		get_transient('key');
+	}
+
+	/**
+	 * @Warmup(2)
+	 * @Revs(1000)
+	 * @Iterations(5)
+	 */
+	public function benchDelete() {
+		$this->cache->delete('key');
+	}
+
+	/**
+	 * @Warmup(2)
+	 * @Revs(1000)
+	 * @Iterations(5)
+	 */
+	public function benchDeleteTransient() {
+		delete_transient('key');
+	}
+}

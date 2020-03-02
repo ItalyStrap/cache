@@ -6,7 +6,7 @@ includes:
     - vendor/phpstan/phpstan/conf/bleedingEdge.neon
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
 parameters:
-    level: max
+    level: 2
     inferPrivatePropertyTypeFromConstructor: true
     paths:
         - %currentWorkingDirectory%/src/
@@ -20,3 +20,4 @@ parameters:
         #- '#^Function apply_filters invoked with [34567] parameters, 2 required\.$#'
         #- '#Access to an undefined property ItalyStrap\\Config\\Config::\$[a-zA-Z0-9_]+#'
         #- '#Access to an undefined property ItalyStrap\\Config\\ConfigInterface::\$[a-zA-Z0-9_]+#'
+        - '#PHPDoc tag @throws with type Psr\\SimpleCache\\InvalidArgumentException is not subtype of Throwable#'

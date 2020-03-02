@@ -1,0 +1,14 @@
+{
+  "bootstrap": "index.php",
+  "php_disable_ini": true,
+  "path": "tests/benchmarks",
+  "reports": {
+    "performance": {
+      "extends": "default",
+      "title": "Simple Cahce Performance",
+      "description": "Benchmark how long it takes to run simple cache",
+      "cols": [ "subject", "mode" ]
+    }
+  },
+  "time_unit": "milliseconds"
+}
