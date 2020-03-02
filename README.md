@@ -155,9 +155,9 @@ use ItalyStrap\Cache\SimpleCache;
 $cache = new SimpleCache();
 
 // Get any existing copy of our transient data
-if ( false === ( $special_query_results = $cache->get( 'special_data_to_save' ) ) ) {
+if ( false === ( $special_data_to_save = $cache->get( 'special_data_to_save' ) ) ) {
     // It wasn't there, so regenerate the data and save the transient
-     $cache->set( 'special_query_results', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+     $cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
 }
 // Use the data like you would have normally...
 
@@ -166,7 +166,7 @@ if ( false === ( $special_query_results = $cache->get( 'special_data_to_save' ) 
 // Get any existing copy of our transient data
 if ( ! $cache->has( 'special_data_to_save' ) ) {
     // It wasn't there, so regenerate the data and save the transient
-     $cache->set( 'special_query_results', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+     $cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
 }
 // Use the data like you would have normally...
 ```
