@@ -28,7 +28,12 @@ This package adheres to the [SemVer](http://semver.org/) specification and will 
 
 ## Basic Usage
 
-> TODO
+```php
+use ItalyStrap\Cache;
+
+$cache = new SimpleCache
+
+```
 
 ## Advanced Usage
 

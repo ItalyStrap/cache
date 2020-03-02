@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\Benchmark;
 
-use ItalyStrap\SimpleCache\Cache;
+use ItalyStrap\Cache\SimpleCache;
 
 /**
  * @BeforeMethods({"init"})
@@ -29,7 +29,7 @@ class SimpleCacheBench {
 			return true;
 		});
 
-		$this->cache = new Cache();
+		$this->cache = new SimpleCache();
 	}
 
 	/**

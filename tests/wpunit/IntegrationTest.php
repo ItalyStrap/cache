@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests;
 
 use Codeception\TestCase\WPTestCase;
-use ItalyStrap\SimpleCache\Cache;
+use ItalyStrap\Cache\SimpleCache;
 use WpunitTester;
 
 class IntegrationTest extends WPTestCase {
@@ -14,14 +14,14 @@ class IntegrationTest extends WPTestCase {
 	 */
 	protected $tester;
 	/**
-	 * @var Cache
+	 * @var SimpleCache
 	 */
 	private $simple_cache;
 
 	public function setUp(): void {
 		// Before...
 		parent::setUp();
-		$this->simple_cache = new Cache();
+		$this->simple_cache = new SimpleCache();
 
 		// Your set up methods here.
 	}

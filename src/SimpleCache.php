@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace ItalyStrap\SimpleCache;
+namespace ItalyStrap\Cache;
 
 use ArrayObject;
 use DateInterval;
 use DateTime;
 use Exception;
-use ItalyStrap\SimpleCache\Exceptions\InvalidArgumentSimpleCacheException;
-use Psr\SimpleCache\CacheInterface;
+use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
+use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
 use Traversable;
 use function array_keys;
 use function array_map;
@@ -25,7 +25,8 @@ use function iterator_to_array;
 use function set_transient;
 use function sprintf;
 
-class Cache implements CacheInterface {
+class SimpleCache implements PsrSimpleCacheInterface
+{
 
 	/**
 	 * Data value of the transient

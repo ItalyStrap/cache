@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests;
 
 use Codeception\Test\Unit;
-use ItalyStrap\SimpleCache\Exceptions\InvalidArgumentSimpleCacheException;
+use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
 use Psr\SimpleCache\InvalidArgumentException;
 use Traversable;
 
@@ -47,9 +47,9 @@ class SimpleCacheTest extends Unit {
 	}
 
 	public function getInstance() {
-		$sut = new \ItalyStrap\SimpleCache\Cache();
+		$sut = new \ItalyStrap\Cache\SimpleCache();
 		$this->assertInstanceOf(\Psr\SimpleCache\CacheInterface::class, $sut, '' );
-		$this->assertInstanceOf(\ItalyStrap\SimpleCache\Cache::class, $sut, '' );
+		$this->assertInstanceOf(\ItalyStrap\Cache\SimpleCache::class, $sut, '' );
 		return $sut;
 	}
 
