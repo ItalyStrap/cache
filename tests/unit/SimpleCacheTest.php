@@ -5,6 +5,8 @@ namespace ItalyStrap\Tests;
 
 use Codeception\Test\Unit;
 use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
+use ItalyStrap\Cache\SimpleCache;
+use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use Traversable;
 
@@ -42,14 +44,16 @@ class SimpleCacheTest extends Unit {
 	protected function _after() {
 		\tad\FunctionMockerLe\undefineAll([
 			'get_transient',
+			'set_transient',
+			'delete_transient',
 		]);
 		$this->store = [];
 	}
 
 	public function getInstance() {
-		$sut = new \ItalyStrap\Cache\SimpleCache();
-		$this->assertInstanceOf(\Psr\SimpleCache\CacheInterface::class, $sut, '' );
-		$this->assertInstanceOf(\ItalyStrap\Cache\SimpleCache::class, $sut, '' );
+		$sut = new SimpleCache();
+		$this->assertInstanceOf( CacheInterface::class, $sut, '' );
+		$this->assertInstanceOf( SimpleCache::class, $sut, '' );
 		return $sut;
 	}
 
@@ -126,21 +130,31 @@ class SimpleCacheTest extends Unit {
 	/**
 	 * @test
 	 */
-	public function itShouldGetTransientValueToFalse() {
+	public function itShouldGetZeroValue() {
 
 		$this->store['key'] = 0;
 
 		$sut = $this->getInstance();
 		$value = $sut->get('key');
-		$this->assertTrue(0 === $value, '');
+		$this->assertSame(0, $value, '');
+		$this->assertNotSame(false, $value, '');
 	}
 
 	/**
 	 * @test
 	 */
-	public function itShouldGetDefaultValue() {
+	public function itShouldGetTransientValueReturnNullWhenNoValueIsStoredBecauseNullIsDefaultValue() {
 		$sut = $this->getInstance();
-		$value = $sut->get('not-value-stored', 'default-value');
+		$value = $sut->get('key');
+		$this->assertNull($value, '');
+	}
+
+	/**
+	 * @test
+	 */
+	public function itShouldGetCustomDefaultValue() {
+		$sut = $this->getInstance();
+		$value = $sut->get('not-a-value-stored', 'default-value');
 		$this->assertSame('default-value', $value, '');
 	}
 
@@ -154,6 +168,15 @@ class SimpleCacheTest extends Unit {
 			],
 			'one value'	=>	[
 				1
+			],
+			'negative value'	=>	[
+				-1
+			],
+			'serialized obj'	=>	[
+				\serialize( ( new \stdClass() ) )
+			],
+			'serialized array'	=>	[
+				\serialize( ['key'=>'value'] )
 			],
 		];
 	}
