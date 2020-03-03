@@ -6,6 +6,7 @@
 [![Latest Unstable Version](https://img.shields.io/packagist/vpre/italystrap/cache.svg)](https://packagist.org/packages/italystrap/cache)
 [![License](https://img.shields.io/packagist/l/italystrap/cache.svg)](https://packagist.org/packages/italystrap/cache)
 ![PHP from Packagist](https://img.shields.io/packagist/php-v/italystrap/cache)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FItalyStrap%2Fcache%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/ItalyStrap/cache/master)
 
 Simple PSR-16 cache implementations for WordPress transient the OOP way
 
