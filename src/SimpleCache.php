@@ -51,7 +51,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	public function get( $key, $default = null ) {
 		$this->assertKeyIsValid( $key );
 		
-		if($this->data[$key] ?? false) {
+		if ( $this->data[$key] ?? false ) {
 			return $this->data[$key];
 		}
 
