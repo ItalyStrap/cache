@@ -44,17 +44,14 @@ class SimpleCache implements PsrSimpleCacheInterface {
 
 	/**
 	 * @inheritDoc
+	 * If you need to store booleans use 0 or 1 because
+	 * get_transient() return false if value is not set or is expired
+	 * @see get_transient()
 	 */
 	public function get( $key, $default = null ) {
 		$this->assertKeyIsValid( $key );
 
 		$value = get_transient( $key );
-		// If you need to store booleans use 0 or 1 because
-		// get_transient() return false if value is not set or is expired
-//		if ( 0 === $value ) {
-//			return $value;
-//		}
-
 		if ( false === $value ) {
 			return $default;
 		}
@@ -68,7 +65,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 */
 	public function set( $key, $value, $ttl = null ): bool {
 		$this->assertKeyIsValid( $key );
-		$this->data[$key] = $key;
+		$this->data[$key] = $value;
 
 		if ($ttl instanceof DateInterval) {
 			$ttl = $this->convertDateIntervalToInteger($ttl);
@@ -153,11 +150,11 @@ class SimpleCache implements PsrSimpleCacheInterface {
 			throw new InvalidArgumentSimpleCacheException( sprintf(
 				'The $key must be a string, %s given',
 				gettype( $key )
-			), 0 );
+			) );
 		}
 
 		if ( empty( $key ) ) {
-			throw new InvalidArgumentSimpleCacheException( 'The $key must be not empty', 0 );
+			throw new InvalidArgumentSimpleCacheException( 'The $key must be not empty' );
 		}
 	}
 

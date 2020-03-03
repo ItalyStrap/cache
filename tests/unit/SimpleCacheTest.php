@@ -48,6 +48,8 @@ class SimpleCacheTest extends Unit {
 			'delete_transient',
 		]);
 		$this->store = [];
+		$this->set_transient_return = true;
+		$this->delete_transient_return = true;
 	}
 
 	public function getInstance() {
@@ -205,6 +207,17 @@ class SimpleCacheTest extends Unit {
 	/**
 	 * @test
 	 */
+	public function setCouldReturnFalse() {
+		$this->store = [];
+		$this->set_transient_return = false;
+		$sut = $this->getInstance();
+		$has_set = $sut->set('key', 'value');
+		$this->assertFalse($has_set, '');
+	}
+
+	/**
+	 * @test
+	 */
 	public function itShouldHasValue() {
 		$this->store = [];
 		$sut = $this->getInstance();
@@ -233,7 +246,7 @@ class SimpleCacheTest extends Unit {
 		$this->assertFalse($sut->has('key'), '');
 	}
 
-	public function getMultipleKeys() {
+	public function multipleInvalidKeys() {
 		return [
 			'empty key'	=> [
 				''
@@ -244,12 +257,15 @@ class SimpleCacheTest extends Unit {
 			'int key'	=> [
 				0
 			],
+			'bool key'	=> [
+				true
+			],
 		];
 	}
 
 	/**
 	 * @test
-	 * @dataProvider getMultipleKeys()
+	 * @dataProvider multipleInvalidKeys()
 	 */
 	public function itShouldThrownErrorOnGetMultipleValuesWith($key) {
 		$sut = $this->getInstance();
@@ -259,7 +275,7 @@ class SimpleCacheTest extends Unit {
 
 	/**
 	 * @test
-	 * @dataProvider getMultipleKeys()
+	 * @dataProvider multipleInvalidKeys()
 	 */
 	public function itShouldThrownErrorOnSetMultipleValuesWith($key) {
 		$sut = $this->getInstance();
@@ -269,7 +285,7 @@ class SimpleCacheTest extends Unit {
 
 	/**
 	 * @test
-	 * @dataProvider getMultipleKeys()
+	 * @dataProvider multipleInvalidKeys()
 	 */
 	public function itShouldThrownErrorOnDeleteMultipleValuesWith($key) {
 		$sut = $this->getInstance();
@@ -345,13 +361,40 @@ class SimpleCacheTest extends Unit {
 	/**
 	 * @test
 	 */
+	public function setMultipleShouldReturnTrue() {
+		$values = [
+			'key'	=> 'some-other-value',
+			'key2'	=> 'value 2',
+		];
+		$sut = $this->getInstance();
+		$has_set_multiple = $sut->setMultiple($values);
+		$this->assertTrue($has_set_multiple, '');
+	}
+
+	/**
+	 * @test
+	 */
+	public function setMultipleCouldReturnFalse() {
+		$values = [
+			'key'	=> 'some-other-value',
+			'key2'	=> 'value 2',
+		];
+		$this->set_transient_return = false;
+		$sut = $this->getInstance();
+		$has_set_multiple = $sut->setMultiple($values);
+		$this->assertFalse($has_set_multiple, '');
+	}
+
+	/**
+	 * @test
+	 */
 	public function itShouldSetMultipleValues() {
 		$values = [
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
 		$sut = $this->getInstance();
-		$sut->setMultiple($values);
+		$has_set_multiple = $sut->setMultiple($values);
 		$this->assertSame($this->store, $sut->getMultiple(\array_keys($values)), '');
 	}
 
@@ -418,31 +461,9 @@ class SimpleCacheTest extends Unit {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		]);
-		$this->assertSame($this->store, [
-			'key'	=> 'some-other-value',
-			'key2'	=> 'value 2',
-		], '');
 
 		$sut->clear();
 
 		$this->assertSame([], $this->store, '');
-	}
-
-	/**
-	 * @test
-	 */
-	public function itShouldClearCachegsdg() {
-		$sut = $this->getInstance();
-
-		try {
-			$sut->setMultiple( [
-				'key' => 'some-other-value',
-				'key2' => 'value 2',
-			] );
-		} catch (InvalidArgumentException $e) {
-		}
-
-		$return = $sut->clear();
-		$this->assertTrue($return, '');
 	}
 }
