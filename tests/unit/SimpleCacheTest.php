@@ -20,6 +20,7 @@ class SimpleCacheTest extends Unit {
 	private $store = [];
 	private $set_transient_return = true;
 	private $delete_transient_return = true;
+	private $ttl = 0;
 
 	// phpcs:ignore
 	protected function _before() {
@@ -29,7 +30,7 @@ class SimpleCacheTest extends Unit {
 		});
 		// phpcs:ignore
 		\tad\FunctionMockerLe\define('set_transient', function ( string $key, $value, $ttl = 0 ) {
-			$ttl = \intval($ttl);
+			$this->ttl = $ttl;
 			$this->store[ $key ] = $value;
 			return $this->set_transient_return;
 		});
@@ -528,5 +529,17 @@ class SimpleCacheTest extends Unit {
 		$sut->clear();
 
 		$this->assertSame([], $this->store, '');
+	}
+
+	/**
+	 * @test
+	 */
+	public function itShouldBeTenSecondTTL() {
+		$date = new \DateInterval('PT10S');
+
+		$sut = $this->getInstance();
+		$sut->set('key', 'value', $date);
+
+		$this->assertSame($date->s, $this->ttl, '');
 	}
 }

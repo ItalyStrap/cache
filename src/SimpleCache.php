@@ -164,7 +164,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 * @throws Exception
 	 * @author Roave\DoctrineSimpleCache;
 	 */
-	private function convertDateIntervalToInteger( DateInterval $ttl) : int {
+	private function convertDateIntervalToInteger( DateInterval $ttl ) : int {
 		// Timestamp has 2038 year limitation, but it's unlikely to set TTL that long.
 		return (new DateTime())
 			->setTimestamp(0)
