@@ -50,11 +50,17 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 */
 	public function get( $key, $default = null ) {
 		$this->assertKeyIsValid( $key );
+		
+		if($this->data[$key] ?? false) {
+			return $this->data[$key];
+		}
 
 		$value = get_transient( $key );
 		if ( false === $value ) {
 			return $default;
 		}
+		
+		$this->data[$key] = $value;
 
 		return $value;
 	}
