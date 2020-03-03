@@ -4,6 +4,9 @@
       "src"
     ]
   },
+  "logs": {
+    "text": "php://stdout"
+  },
   "timeout": 10,
   "mutators": {
     "@default": true

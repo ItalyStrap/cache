@@ -38,7 +38,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	/**
 	 * @inheritDoc
 	 */
-	public function has( $key ) {
+	public function has( $key ): bool {
 		return boolval( $this->get( $key ) );
 	}
 
