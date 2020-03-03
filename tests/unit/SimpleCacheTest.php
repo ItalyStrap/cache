@@ -492,6 +492,19 @@ class SimpleCacheTest extends Unit {
 	/**
 	 * @test
 	 */
+	public function itShouldDeleteMultipleReturnTrue() {
+		$this->store = [
+			'key'	=> 'some-other-value',
+			'key2'	=> 'value 2',
+		];
+		$sut = $this->getInstance();
+		$return = $sut->deleteMultiple(\array_keys($this->store));
+		$this->assertTrue($return, '');
+	}
+
+	/**
+	 * @test
+	 */
 	public function itShouldDeleteMultipleValuesWithArrayAccess() {
 		$this->store = [
 			'key'	=> 'some-other-value',
