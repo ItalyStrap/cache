@@ -270,6 +270,7 @@ class SimpleCacheTest extends Unit {
 	public function itShouldThrownErrorOnGetMultipleValuesWith($key) {
 		$sut = $this->getInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
+		$this->expectExceptionMessageMatches('#Cache keys must be array or Traversable#');
 		$multiple = $sut->getMultiple($key);
 	}
 
@@ -280,6 +281,7 @@ class SimpleCacheTest extends Unit {
 	public function itShouldThrownErrorOnSetMultipleValuesWith($key) {
 		$sut = $this->getInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
+		$this->expectExceptionMessageMatches('#Cache values must be array or Traversable#');
 		$multiple = $sut->setMultiple($key);
 	}
 
@@ -290,6 +292,54 @@ class SimpleCacheTest extends Unit {
 	public function itShouldThrownErrorOnDeleteMultipleValuesWith($key) {
 		$sut = $this->getInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
+		$this->expectExceptionMessageMatches('#Cache keys must be array or Traversable#');
+		$multiple = $sut->deleteMultiple($key);
+	}
+
+	public function multipleInvalidArrayKeys() {
+		return [
+			'empty key'	=> [
+				['' => '']
+			],
+			'int key'	=> [
+				[0 => 0]
+			],
+			'bool key'	=> [
+				[true => 0]
+			],
+		];
+	}
+
+	/**
+	 * @test
+	 * @dataProvider multipleInvalidArrayKeys()
+	 */
+	public function itShouldThrownErrorOnGetMultipleValuesIfTheArrayKeysHas($key) {
+		$sut = $this->getInstance();
+		$this->expectException(InvalidArgumentSimpleCacheException::class);
+		$this->expectExceptionMessageMatches('#The \$key must be#');
+		$multiple = $sut->getMultiple($key);
+	}
+
+	/**
+	 * @test
+	 * @dataProvider multipleInvalidArrayKeys()
+	 */
+	public function itShouldThrownErrorOnSetMultipleValuesIfTheArrayKeysHas($key) {
+		$sut = $this->getInstance();
+		$this->expectException(InvalidArgumentSimpleCacheException::class);
+		$this->expectExceptionMessageMatches('#The \$key must be#');
+		$multiple = $sut->setMultiple($key);
+	}
+
+	/**
+	 * @test
+	 * @dataProvider multipleInvalidArrayKeys()
+	 */
+	public function itShouldThrownErrorOnDeleteMultipleValuesIfTheArrayKeysHas($key) {
+		$sut = $this->getInstance();
+		$this->expectException(InvalidArgumentSimpleCacheException::class);
+		$this->expectExceptionMessageMatches('#The \$key must be#');
 		$multiple = $sut->deleteMultiple($key);
 	}
 

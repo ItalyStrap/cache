@@ -178,7 +178,6 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 */
 	private function assertKeysAreValid( $keys ): array {
 		$keys = $this->toArray($keys, 'keys');
-		array_map( [$this, 'assertKeyIsValid'], $keys );
 		return $keys;
 	}
 
