@@ -51,9 +51,9 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		$value = get_transient( $key );
 		// If you need to store booleans use 0 or 1 because
 		// get_transient() return false if value is not set or is expired
-		if ( 0 === $value ) {
-			return $value;
-		}
+//		if ( 0 === $value ) {
+//			return $value;
+//		}
 
 		if ( false === $value ) {
 			return $default;
