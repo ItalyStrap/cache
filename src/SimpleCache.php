@@ -53,7 +53,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 
 		$value = get_transient( $key );
 		if ( false === $value ) {
-			return $default;
+			$value = $default;
 		}
 
 		return $value;
