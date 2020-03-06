@@ -39,7 +39,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 * @inheritDoc
 	 */
 	public function has( $key ): bool {
-		return boolval( $this->get( $key ) );
+		return $this->get( $key, false ) !== false;
 	}
 
 	/**
@@ -53,7 +53,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 
 		$value = get_transient( $key );
 		if ( false === $value ) {
-			return $default;
+			$value = $default;
 		}
 
 		return $value;
