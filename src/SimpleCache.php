@@ -11,8 +11,6 @@ use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
 use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
 use Traversable;
 use function array_keys;
-use function array_map;
-use function boolval;
 use function delete_transient;
 use function get_class;
 use function get_transient;
@@ -33,7 +31,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 *
 	 * @var array
 	 */
-	private $data = [];
+	private $used_keys = [];
 
 	/**
 	 * @inheritDoc
@@ -50,6 +48,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 */
 	public function get( $key, $default = null ) {
 		$this->assertKeyIsValid( $key );
+		$this->addUsedKey( $key );
 
 		$value = get_transient( $key );
 		if ( false === $value ) {
@@ -65,7 +64,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 */
 	public function set( $key, $value, $ttl = null ): bool {
 		$this->assertKeyIsValid( $key );
-		$this->data[$key] = $value;
+		$this->addUsedKey( $key );
 
 		if ($ttl instanceof DateInterval) {
 			$ttl = $this->convertDateIntervalToInteger($ttl);
@@ -79,7 +78,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 */
 	public function delete( $key ): bool {
 		$this->assertKeyIsValid( $key );
-		unset($this->data[$key]);
+		$this->deleteUsedKey( $key );
 		return delete_transient( $key );
 	}
 
@@ -138,7 +137,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 * @throws \Psr\SimpleCache\InvalidArgumentException
 	 */
 	public function clear(): bool {
-		return $this->deleteMultiple( array_keys( $this->data ) );
+		return $this->deleteMultiple( $this->usedKeys() );
 	}
 
 	/**
@@ -207,5 +206,26 @@ class SimpleCache implements PsrSimpleCacheInterface {
 				is_object( $other ) ? get_class( $other ) : gettype( $other )
 			)
 		);
+	}
+
+	/**
+	 * @param string $key
+	 */
+	private function addUsedKey( $key ): void {
+		$this->used_keys[ $key ] = $key;
+	}
+
+	/**
+	 * @param string $key
+	 */
+	private function deleteUsedKey( $key ): void {
+		unset( $this->used_keys[ $key ] );
+	}
+
+	/**
+	 * @return array
+	 */
+	private function usedKeys(): array {
+		return $this->used_keys;
 	}
 }
