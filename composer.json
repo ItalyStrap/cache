@@ -1,7 +1,7 @@
 {
     "name": "italystrap/cache",
     "description": "Simple PSR-16 cache implementations for WordPress transient the OOP way",
-    "keywords": [],
+    "keywords": ["psr", "psr-16", "cache", "WordPress", "transient", "transients"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -41,7 +41,7 @@
         }
     },
     "provide": {
-        "psr/simple-cache-implementation": "1.0"
+        "psr/simple-cache-implementation": "1.0|2.0|3.0"
     },
     "scripts": {
         "check": [
@@ -57,5 +57,13 @@
     "support"    : {
         "issues": "https://github.com/ItalyStrap/cleaner/issues",
         "source": "https://github.com/ItalyStrap/cleaner"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "ocramius/package-versions": true,
+            "cweagans/composer-patches": true,
+            "codeception/c3": true
+        }
     }
 }

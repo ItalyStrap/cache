@@ -1,13 +1,13 @@
 <?php
 /*
-Plugin Name: Cahce
+Plugin Name: Cache
 Description: PSR-16 implementation
 Plugin URI: https://italystrap.com
 Author: Enea Overclokk
 Author URI: https://italystrap.com
 Version: 1.0.0
 License: GPL2
-Text Domain: Text Domain
+Text Domain: text-domain
 Domain Path: Domain Path
 */
 
