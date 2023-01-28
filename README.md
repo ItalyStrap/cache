@@ -1,6 +1,6 @@
 # ItalyStrap Cache API
 
-[![Build Status](https://travis-ci.org/ItalyStrap/cache.svg?branch=master)](https://travis-ci.org/ItalyStrap/cache)
+[![Build status](https://github.com/ItalyStrap/cache/actions/workflows/test.yml/badge.svg)](https://github.com/ItalyStrap/cache/actions/workflows/test.yml?query=workflow%3Atest)
 [![Latest Stable Version](https://img.shields.io/packagist/v/italystrap/cache.svg)](https://packagist.org/packages/italystrap/cache)
 [![Total Downloads](https://img.shields.io/packagist/dt/italystrap/cache.svg)](https://packagist.org/packages/italystrap/cache)
 [![Latest Unstable Version](https://img.shields.io/packagist/vpre/italystrap/cache.svg)](https://packagist.org/packages/italystrap/cache)
