@@ -48,7 +48,7 @@ const YEAR_IN_SECONDS    = 365 * DAY_IN_SECONDS;
 use ItalyStrap\Cache\SimpleCache;
 
 $cache = new SimpleCache();
-$cache->set( 'special_data_to_save',['some-key' => 'come value'], 12 * HOUR_IN_SECONDS ); // Return bool
+$cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS ); // Return bool
 ```
 
 ### Fetching cache
@@ -57,6 +57,8 @@ $cache->set( 'special_data_to_save',['some-key' => 'come value'], 12 * HOUR_IN_S
 use ItalyStrap\Cache\SimpleCache;
 
 $cache = new SimpleCache();
+$cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+
 $fetched_value = $cache->get( 'special_data_to_save' ); // ['some-key' => 'come value']
 ```
 
@@ -66,6 +68,8 @@ $fetched_value = $cache->get( 'special_data_to_save' ); // ['some-key' => 'come 
 use ItalyStrap\Cache\SimpleCache;
 
 $cache = new SimpleCache();
+$cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+
 $cache->delete( 'special_data_to_save' ); // Return bool
 ```
 
