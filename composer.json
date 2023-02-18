@@ -21,14 +21,13 @@
         "lucatume/wp-browser": "^3.1",
         "lucatume/function-mocker-le": "^1.0",
         "codeception/module-asserts": "^1.0",
+        "codeception/module-db": "^1.2",
+        "codeception/module-phpbrowser": "^1.0",
         "phpspec/prophecy-phpunit": "^2.0",
 
         "squizlabs/php_codesniffer": "^3.7",
         "phpcompatibility/php-compatibility": "^9.3",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-
-        "infection/infection": "^0.26.6",
-        "infection/codeception-adapter": "^0.4.1",
 
         "vimeo/psalm": "^5.6",
         "humanmade/psalm-plugin-wordpress": "^3.0.0-alpha1",
@@ -52,21 +51,23 @@
             "tests/"
         ],
         "psr-4": {
-            "ItalyStrap\\Tests\\": "tests/"
+            "ItalyStrap\\Tests\\": "tests/src/",
+            "ItalyStrap\\Tests\\Unit\\": "tests/unit/",
+            "ItalyStrap\\Tests\\WPUnit\\": "tests/wpunit/"
         }
     },
     "provide": {
         "psr/simple-cache-implementation": "1.0|2.0|3.0"
     },
     "scripts": {
-        "check": [
+        "compat": [
             ".\\vendor\\bin\\phpcs -p --standard=PHPCompatibility src"
-        ],
-        "test": [
-            "test"
         ],
         "metrics": [
             "vendor/bin/phpmetrics --report-html='./tests/_output/report' ./src"
+        ],
+        "psalm": [
+            "@php ./vendor/bin/psalm"
         ],
         "wpunit": [
             "@php ./vendor/bin/codecept run wpunit"
@@ -85,6 +86,13 @@
         ],
         "cs:fix": [
             "@php vendor/bin/phpcbf -p --ignore=./tests/_support/* ./src/ ./tests/"
+        ],
+        "qa": [
+            "@compat",
+            "@cs",
+            "@psalm",
+            "@unit",
+            "@wpunit"
         ]
     },
     "support"    : {

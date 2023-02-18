@@ -25,7 +25,6 @@ use function sprintf;
 
 class SimpleCache implements PsrSimpleCacheInterface {
 
-
 	/**
 	 * Data value of the transient
 	 *
