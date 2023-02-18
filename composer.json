@@ -6,7 +6,7 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "overclokk",
+            "name": "Enea Overclokk",
             "email": "info@overclokk.net",
             "homepage": "https://www.italystrap.com",
             "role": "Developer"
@@ -14,30 +14,45 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php" : ">=7.2",
+        "php" : ">=7.4",
         "psr/simple-cache": "^1.0"
     },
     "require-dev": {
-        "lucatume/wp-browser": "~2.2",
-        "codeception/c3": "2.*",
+        "lucatume/wp-browser": "^3.1",
         "lucatume/function-mocker-le": "^1.0",
-        "italystrap/debug": "~2.0",
-        "wp-coding-standards/wpcs": "^2.1",
+        "codeception/module-asserts": "^1.0",
+        "phpspec/prophecy-phpunit": "^2.0",
+
+        "squizlabs/php_codesniffer": "^3.7",
         "phpcompatibility/php-compatibility": "^9.3",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
-        "phpstan/phpstan": "^0.11.16",
-        "szepeviktor/phpstan-wordpress": "^0.3.0",
-        "phpbench/phpbench": "@dev",
-        "infection/infection": "^0.15.3",
-        "vimeo/psalm": "^3.9",
-        "phpmetrics/phpmetrics": "^2.5",
-        "roave/doctrine-simplecache": "^2.3",
-        "symfony/cache": "^5.0",
-        "psr/cache": "^1.0"
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+
+        "infection/infection": "^0.26.6",
+        "infection/codeception-adapter": "^0.4.1",
+
+        "vimeo/psalm": "^5.6",
+        "humanmade/psalm-plugin-wordpress": "^3.0.0-alpha1",
+
+        "phpbench/phpbench": "^1.2",
+        "phpmetrics/phpmetrics": "^2.8",
+
+        "rector/rector": "^0.15.17",
+        "roave/doctrine-simplecache": "^2.5",
+        "symfony/cache": "^5.4",
+        "psr/cache": "^1.0",
+        "italystrap/debug": "^2.1"
     },
     "autoload": {
         "psr-4": {
             "ItalyStrap\\Cache\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/"
+        ],
+        "psr-4": {
+            "ItalyStrap\\Tests\\": "tests/"
         }
     },
     "provide": {
@@ -52,6 +67,24 @@
         ],
         "metrics": [
             "vendor/bin/phpmetrics --report-html='./tests/_output/report' ./src"
+        ],
+        "wpunit": [
+            "@php ./vendor/bin/codecept run wpunit"
+        ],
+        "wpunit:debug": [
+            "@wpunit --debug"
+        ],
+        "unit": [
+            "@php ./vendor/bin/codecept run unit"
+        ],
+        "unit:debug": [
+            "@unit --debug"
+        ],
+        "cs": [
+            "@php vendor/bin/phpcs -p --ignore=./tests/_support/* ./src/ ./tests/"
+        ],
+        "cs:fix": [
+            "@php vendor/bin/phpcbf -p --ignore=./tests/_support/* ./src/ ./tests/"
         ]
     },
     "support"    : {
@@ -63,7 +96,8 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "ocramius/package-versions": true,
             "cweagans/composer-patches": true,
-            "codeception/c3": true
+            "codeception/c3": true,
+            "infection/extension-installer": true
         }
     }
 }
