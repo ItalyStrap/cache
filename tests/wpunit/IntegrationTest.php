@@ -8,8 +8,7 @@ use ItalyStrap\Tests\WPTestCase;
 
 class IntegrationTest extends WPTestCase {
 
-	private function makeInstance(): SimpleCache
-	{
+	private function makeInstance(): SimpleCache {
 		$sut = new SimpleCache();
 		return $sut;
 	}
@@ -17,33 +16,32 @@ class IntegrationTest extends WPTestCase {
 	/**
 	 * @test
 	 */
-	public function instanceOk(): void
-	{
-//		$sut = $this->makeInstance();
+	public function instanceOk(): void {
+		$sut = $this->makeInstance();
 	}
 
 	/**
 	 * @test
 	 */
-//	public function setTransient() {
-//		$this->simple_cache->set( 'key', 'value' );
-//		$this->assertSame('value', \get_transient('key'), '');
-//	}
+	public function setTransient() {
+		$this->makeInstance()->set( 'key', 'value' );
+		$this->assertSame('value', \get_transient('key'), '');
+	}
 
 	/**
 	 * @test
 	 */
-//	public function getTransient() {
-//		\set_transient( 'key', 'value' );
-//		$this->assertSame('value', $this->simple_cache->get('key'), '');
-//	}
+	public function getTransient() {
+		\set_transient( 'key', 'value' );
+		$this->assertSame('value', $this->makeInstance()->get('key'), '');
+	}
 
 	/**
 	 * @test
 	 */
-//	public function deleteTransient() {
-//		\set_transient( 'key', 'value' );
-//		$this->simple_cache->delete('key');
-//		$this->assertFalse(\get_transient('key'), '');
-//	}
+	public function deleteTransient() {
+		\set_transient( 'key', 'value' );
+		$this->makeInstance()->delete('key');
+		$this->assertFalse(\get_transient('key'), '');
+	}
 }

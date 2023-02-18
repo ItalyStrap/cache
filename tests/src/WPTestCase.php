@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace ItalyStrap\Tests;
@@ -7,15 +6,14 @@ namespace ItalyStrap\Tests;
 use Codeception\TestCase\WPTestCase as WPUnit;
 use PHPUnit\Util\Test as TestUtil;
 
-class WPTestCase extends WPUnit
-{
+class WPTestCase extends WPUnit {
+
 	/**
 	 * @var \WPUnitTester
 	 */
 	protected $tester;
 
-	public function setUp(): void
-	{
+	public function setUp(): void {
 		// Before...
 		parent::setUp();
 
@@ -26,8 +24,7 @@ class WPTestCase extends WPUnit
 		// Your set up methods here.
 	}
 
-	public function tearDown(): void
-	{
+	public function tearDown(): void {
 		// Your tear down methods here.
 
 		// Then...
@@ -37,20 +34,8 @@ class WPTestCase extends WPUnit
 	/**
 	 * @test
 	 */
-	public function canCreatePost(): void
-	{
+	public function canCreatePost(): void {
 		$post = static::factory()->post->create_and_get(['post_excerpt' => 'Lorem Ipsum']);
 		$this->assertInstanceOf(\WP_Post::class, $post);
-	}
-
-	/**
-	 * @test
-	 */
-	public function getAnnotations(): array
-	{
-		return TestUtil::parseTestMethodAnnotations(
-			static::class,
-			$this->name
-		);
 	}
 }

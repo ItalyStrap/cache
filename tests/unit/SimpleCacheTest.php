@@ -3,55 +3,14 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\Unit;
 
-use Codeception\Test\Unit;
 use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Tests\TestCase;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use Traversable;
 
-class SimpleCacheTest extends Unit {
-
-	/**
-	 * @var \UnitTester
-	 */
-	protected $tester;
-
-	private $store = [];
-	private $set_transient_return = true;
-	private $delete_transient_return = true;
-	private $ttl = 0;
-
-	// phpcs:ignore
-	protected function _before() {
-		// phpcs:ignore
-		\tad\FunctionMockerLe\define('get_transient', function ( string $key ) {
-			return $this->store[ $key ] ?? false;
-		});
-		// phpcs:ignore
-		\tad\FunctionMockerLe\define('set_transient', function ( string $key, $value, $ttl = 0 ) {
-			$this->ttl = $ttl;
-			$this->store[ $key ] = $value;
-			return $this->set_transient_return;
-		});
-		// phpcs:ignore
-		\tad\FunctionMockerLe\define('delete_transient', function ( string $key ) {
-			unset($this->store[ $key ]);
-			return $this->delete_transient_return;
-		});
-	}
-
-	// phpcs:ignore
-	protected function _after() {
-		\tad\FunctionMockerLe\undefineAll([
-			'get_transient',
-			'set_transient',
-			'delete_transient',
-		]);
-		$this->store = [];
-		$this->set_transient_return = true;
-		$this->delete_transient_return = true;
-	}
+class SimpleCacheTest extends TestCase {
 
 	public function getInstance() {
 		$sut = new SimpleCache();
