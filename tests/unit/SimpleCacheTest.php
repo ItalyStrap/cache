@@ -5,6 +5,7 @@ namespace ItalyStrap\Tests\Unit;
 
 use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\TestCase;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -12,29 +13,39 @@ use Traversable;
 
 class SimpleCacheTest extends TestCase {
 
-	public function getInstance() {
+	use CommonTrait;
+
+	public function makeInstance(): SimpleCache {
 		$sut = new SimpleCache();
 		$this->assertInstanceOf( CacheInterface::class, $sut, '' );
 		$this->assertInstanceOf( SimpleCache::class, $sut, '' );
 		return $sut;
 	}
 
-	/**
-	 * @test
-	 */
-	public function instanceOk() {
-		$sut = $this->getInstance();
-	}
+	public function invalidKeys(): iterable {
 
-	public function invalidKeys() {
-		return [
-			'integer key'	=> [
-				1
-			],
-			'empty key'	=> [
-				''
-			],
+		yield 'null key'	=> [
+			1
 		];
+
+		yield 'integer key'	=> [
+			1
+		];
+
+		yield 'empty key'	=> [
+			''
+		];
+
+//		return [
+//			['bar{Foo'],
+//			['bar}Foo'],
+//			['bar(Foo'],
+//			['bar)Foo'],
+//			['bar/Foo'],
+//			['bar\Foo'],
+//			['bar@Foo'],
+//			['bar:Foo']
+//		];
 	}
 
 	/**
@@ -42,7 +53,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider invalidKeys()
 	 */
 	public function itShouldThrownExceptionIfGetKeyIs($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
 		$value = $sut->get($key);
 	}
@@ -52,7 +63,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider invalidKeys()
 	 */
 	public function itShouldThrownExceptionIfSetKeyIs($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException( InvalidArgumentSimpleCacheException::class);
 		$value = $sut->set($key, 'val');
 	}
@@ -62,7 +73,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider invalidKeys()
 	 */
 	public function itShouldThrownExceptionIfHasKeyIs($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException( InvalidArgumentSimpleCacheException::class);
 		$value = $sut->has($key);
 	}
@@ -72,7 +83,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider invalidKeys()
 	 */
 	public function itShouldThrownExceptionIfDeleteKeyIs($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException( InvalidArgumentSimpleCacheException::class);
 		$value = $sut->delete($key);
 	}
@@ -84,7 +95,7 @@ class SimpleCacheTest extends TestCase {
 
 		$this->store['key'] = 'value';
 
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$value = $sut->get('key');
 		$this->assertSame('value', $value, '');
 	}
@@ -96,7 +107,7 @@ class SimpleCacheTest extends TestCase {
 
 		$this->store['key'] = 0;
 
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$value = $sut->get('key');
 		$this->assertSame(0, $value, '');
 		$this->assertNotSame(false, $value, '');
@@ -106,7 +117,7 @@ class SimpleCacheTest extends TestCase {
 	 * @test
 	 */
 	public function itShouldGetTransientValueReturnNullWhenNoValueIsStoredBecauseNullIsDefaultValue() {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$value = $sut->get('key');
 		$this->assertNull($value, '');
 	}
@@ -115,7 +126,7 @@ class SimpleCacheTest extends TestCase {
 	 * @test
 	 */
 	public function itShouldGetCustomDefaultValue() {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$value = $sut->get('not-a-value-stored', 'default-value');
 		$this->assertSame('default-value', $value, '');
 	}
@@ -149,7 +160,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldSetValue($value) {
 		$this->store = [];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$sut->set('key', $value);
 		$this->assertSame($value, $sut->get('key'), '');
 	}
@@ -159,7 +170,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldSetValueWithDateintervalForTTL() {
 		$this->store = [];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$sut->set('key', '$value', new \DateInterval('PT2S'));
 		$this->assertSame('$value', $sut->get('key'), '');
 	}
@@ -170,7 +181,7 @@ class SimpleCacheTest extends TestCase {
 	public function setCouldReturnFalse() {
 		$this->store = [];
 		$this->set_transient_return = false;
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$has_set = $sut->set('key', 'value');
 		$this->assertFalse($has_set, '');
 	}
@@ -180,7 +191,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldHasValue() {
 		$this->store = [];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$sut->set('key', 'some-value');
 		$this->assertTrue($sut->has('key'), '');
 	}
@@ -190,7 +201,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldNotHasValue() {
 		$this->store = [];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->assertFalse($sut->has('key'), '');
 	}
 
@@ -201,7 +212,7 @@ class SimpleCacheTest extends TestCase {
 		$this->store = [
 			'key'	=> 'some-other-value'
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$sut->delete('key');
 		$this->assertFalse($sut->has('key'), '');
 	}
@@ -228,7 +239,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider multipleInvalidKeys()
 	 */
 	public function itShouldThrownErrorOnGetMultipleValuesWith($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
 		$this->expectExceptionMessageMatches('#Cache keys must be array or Traversable#');
 		$multiple = $sut->getMultiple($key);
@@ -239,7 +250,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider multipleInvalidKeys()
 	 */
 	public function itShouldThrownErrorOnSetMultipleValuesWith($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
 		$this->expectExceptionMessageMatches('#Cache values must be array or Traversable#');
 		$multiple = $sut->setMultiple($key);
@@ -250,7 +261,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider multipleInvalidKeys()
 	 */
 	public function itShouldThrownErrorOnDeleteMultipleValuesWith($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
 		$this->expectExceptionMessageMatches('#Cache keys must be array or Traversable#');
 		$multiple = $sut->deleteMultiple($key);
@@ -275,7 +286,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider multipleInvalidArrayKeys()
 	 */
 	public function itShouldThrownErrorOnGetMultipleValuesIfTheArrayKeysHas($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
 		$this->expectExceptionMessageMatches('#The \$key must be#');
 		$multiple = $sut->getMultiple($key);
@@ -286,7 +297,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider multipleInvalidArrayKeys()
 	 */
 	public function itShouldThrownErrorOnSetMultipleValuesIfTheArrayKeysHas($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
 		$this->expectExceptionMessageMatches('#The \$key must be#');
 		$multiple = $sut->setMultiple($key);
@@ -297,7 +308,7 @@ class SimpleCacheTest extends TestCase {
 	 * @dataProvider multipleInvalidArrayKeys()
 	 */
 	public function itShouldThrownErrorOnDeleteMultipleValuesIfTheArrayKeysHas($key) {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$this->expectException(InvalidArgumentSimpleCacheException::class);
 		$this->expectExceptionMessageMatches('#The \$key must be#');
 		$multiple = $sut->deleteMultiple($key);
@@ -324,7 +335,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$multiple = $sut->getMultiple($traversable);
 		$this->assertSame($this->store, $multiple, '');
 	}
@@ -337,7 +348,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$multiple = $sut->getMultiple(new \ArrayObject(['key', 'key2']));
 		$this->assertSame($this->store, $multiple, '');
 	}
@@ -350,7 +361,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$multiple = $sut->getMultiple(\array_keys( $this->store ));
 		$this->assertSame($this->store, $multiple, '');
 	}
@@ -363,7 +374,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> false,
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$multiple = $sut->getMultiple(\array_keys( $this->store ), 'default');
 		$this->assertTrue('default' === $multiple['key2'], '');
 	}
@@ -376,7 +387,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$has_set_multiple = $sut->setMultiple($values);
 		$this->assertTrue($has_set_multiple, '');
 	}
@@ -390,7 +401,7 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 		$this->set_transient_return = false;
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$has_set_multiple = $sut->setMultiple($values);
 		$this->assertFalse($has_set_multiple, '');
 	}
@@ -403,7 +414,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$has_set_multiple = $sut->setMultiple($values);
 		$this->assertSame($this->store, $sut->getMultiple(\array_keys($values)), '');
 	}
@@ -417,7 +428,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$return = $sut->setMultiple($values);
 		$this->assertFalse($return, '');
 	}
@@ -430,7 +441,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$sut->deleteMultiple(\array_keys($this->store));
 		$this->assertSame($this->store, [], '');
 	}
@@ -444,7 +455,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$return = $sut->deleteMultiple(\array_keys($this->store));
 		$this->assertFalse($return, '');
 	}
@@ -457,7 +468,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$return = $sut->deleteMultiple(\array_keys($this->store));
 		$this->assertTrue($return, '');
 	}
@@ -470,7 +481,7 @@ class SimpleCacheTest extends TestCase {
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$sut->deleteMultiple(new \ArrayObject(\array_keys($this->store)));
 		$this->assertSame($this->store, [], '');
 	}
@@ -479,7 +490,7 @@ class SimpleCacheTest extends TestCase {
 	 * @test
 	 */
 	public function itShouldClearCache() {
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$sut->setMultiple([
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
@@ -496,7 +507,7 @@ class SimpleCacheTest extends TestCase {
 	public function itShouldBeTenSecondTTL() {
 		$date = new \DateInterval('PT10S');
 
-		$sut = $this->getInstance();
+		$sut = $this->makeInstance();
 		$sut->set('key', 'value', $date);
 
 		$this->assertSame($date->s, $this->ttl, '');

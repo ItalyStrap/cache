@@ -7,30 +7,34 @@ use ArrayObject;
 use DateInterval;
 use DateTime;
 use Exception;
+use Fig\Cache\KeyValidatorTrait;
+use ItalyStrap\Cache\Driver\Transient;
 use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
 use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
 use Traversable;
 use function array_keys;
-use function delete_transient;
 use function get_class;
-use function get_transient;
 use function gettype;
 use function intval;
 use function is_array;
 use function is_object;
 use function is_string;
 use function iterator_to_array;
-use function set_transient;
 use function sprintf;
 
+/**
+ * @psalm-api
+ */
 class SimpleCache implements PsrSimpleCacheInterface {
 
-	/**
-	 * Data value of the transient
-	 *
-	 * @var array
-	 */
-	private $used_keys = [];
+//	use KeyValidatorTrait;
+
+	private StorageInterface $storage;
+	private array $used_keys = [];
+
+	public function __construct(StorageInterface $storage = null) {
+		$this->storage = $storage ?? new Transient();
+	}
 
 	/**
 	 * @inheritDoc
@@ -43,13 +47,14 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 * @inheritDoc
 	 * If you need to store booleans use 0 or 1 because
 	 * get_transient() return false if value is not set or is expired
-	 * @see get_transient()
+	 * @see \get_transient()
 	 */
 	public function get( $key, $default = null ) {
 		$this->assertKeyIsValid( $key );
 		$this->addUsedKey( $key );
 
-		$value = get_transient( $key );
+		/** @var mixed $value */
+		$value = $this->storage->get( $key );
 		if ( false === $value ) {
 			$value = $default;
 		}
@@ -69,7 +74,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 			$ttl = $this->convertDateIntervalToInteger($ttl);
 		}
 
-		return set_transient( $key, $value, intval($ttl) );
+		return $this->storage->set( $key, $value, intval($ttl) );
 	}
 
 	/**
@@ -78,7 +83,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	public function delete( $key ): bool {
 		$this->assertKeyIsValid( $key );
 		$this->deleteUsedKey( $key );
-		return delete_transient( $key );
+		return $this->storage->delete( $key );
 	}
 
 	/**
@@ -150,6 +155,8 @@ class SimpleCache implements PsrSimpleCacheInterface {
 				gettype( $key )
 			) );
 		}
+
+//		$this->validateKey($key);
 
 		if ( empty( $key ) ) {
 			throw new InvalidArgumentSimpleCacheException( 'The $key must be not empty' );

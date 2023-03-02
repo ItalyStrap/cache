@@ -13,6 +13,8 @@ class WPTestCase extends WPUnit {
 	 */
 	protected $tester;
 
+	protected string $cache_key;
+
 	public function setUp(): void {
 		// Before...
 		parent::setUp();
@@ -21,11 +23,16 @@ class WPTestCase extends WPUnit {
 		$this->assertTrue((bool)\did_action('plugins_loaded'), '');
 		$this->assertFalse((bool)\did_action('not_valid_event_name'), '');
 
+		$this->cache_key = 'widget_list';
+
 		// Your set up methods here.
 	}
 
 	public function tearDown(): void {
 		// Your tear down methods here.
+
+		\delete_transient($this->cache_key);
+		$this->cache_key = '';
 
 		// Then...
 		parent::tearDown();

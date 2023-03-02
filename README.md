@@ -189,3 +189,9 @@ This code is licensed under the [MIT](LICENSE).
 ## Credits
 
 * [DoctrineSimpleCache](https://github.com/Roave/DoctrineSimpleCache)
+
+## To read
+
+* https://json5.org/
+* https://github.com/Roave/infection-static-analysis-plugin
+* https://www.sitepoint.com/creating-strictly-typed-arrays-collections-php/
