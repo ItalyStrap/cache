@@ -105,4 +105,23 @@ class TransientCachePoolTest extends WPTestCase {
 		$this->expectException(\InvalidArgumentException::class);
 		$this->basicUsageWithLongKeyTrait();
 	}
+
+	/**
+	 * @test
+	 */
+	public function expirationToZero(): void {
+		$expected = \array_fill(0, 2, 'Some value ');
+		$pool_was_called = false;
+
+		$pool = $this->makeInstance();
+		$item = $pool->getItem($this->cache_key);
+		$item->set($expected);
+		$item->expiresAfter(0);
+		$pool_was_called = $pool->save($item);
+
+		$this->assertSame(null, $item->get(), '');
+		$this->assertTrue($pool_was_called, '');
+		$this->assertSame($this->cache_key, $item->getKey(), '');
+		$this->assertSame(\get_transient($this->cache_key), false, '');
+	}
 }

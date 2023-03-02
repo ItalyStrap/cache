@@ -11,7 +11,6 @@ class InMemoryExpiration implements ExpirationInterface {
 	public const TRANSIENT_TIMEOUT_KEY = '_transient_timeout_';
 
 	private ClockInterface $clock;
-	private string $key;
 	private int $expirationTime = 0;
 	private DateTimeImmutable $freezeTime;
 
@@ -26,9 +25,7 @@ class InMemoryExpiration implements ExpirationInterface {
 		$this->freezeTime = $this->clock->now();
 	}
 
-	public function withKey(string $key) {
-		$this->key = $key;
-	}
+	public function withKey(string $key): void {}
 
 	public function isValid(string $key): bool {
 		// If the expiration time is 0 Transient consider it like a no expiration at all.

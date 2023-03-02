@@ -9,27 +9,35 @@ use Psr\Clock\ClockInterface;
 class TransientExpiration implements ExpirationInterface {
 
 	public const TRANSIENT_TIMEOUT_KEY = '_transient_timeout_';
+	public const YEAR_IN_SECONDS = 31536000;
 
 	private ClockInterface $clock;
 	private string $key;
-	private int $expirationTime = 0;
+	private int $expirationTime;
+	private bool $expireMethodWasCalled = false;
+	private ?int $defaultExpiration;
+	/**
+	 * @var DateTimeImmutable|\DateTimeInterface
+	 */
+	private $expiration;
 
-	public function __construct(ClockInterface $clock = null) {
+	public function __construct(ClockInterface $clock = null, int $defaultExpiration = null) {
 		$this->clock = $clock ?? new class implements ClockInterface {
 
 			public function now(): DateTimeImmutable {
 				return new \DateTimeImmutable('now');
 			}
 		};
+
+		$this->defaultExpiration = $defaultExpiration;
 	}
 
-	public function withKey(string $key) {
+	public function withKey(string $key): void {
 		$this->key = $key;
 	}
 
 	public function isValid(string $key): bool {
-		// If the expiration time is 0 Transient consider it like a no expiration at all.
-		if ($this->expirationTime === 0) {
+		if (!$this->expireMethodWasCalled) {
 			return true;
 		}
 
@@ -42,13 +50,14 @@ class TransientExpiration implements ExpirationInterface {
 	 * @return void
 	 */
 	public function expiresAt($expiration): void {
-		if (is_null($expiration)) {
-			$this->expirationTime = (new \DateTimeImmutable('now +1 year'))->getTimestamp() - \time();
+		$this->expireMethodWasCalled = true;
+		if (\is_null($expiration)) {
+			$this->expiration = new \DateTimeImmutable('now +1 year');
 			return;
 		}
 
 		assert('$expiration instanceof \DateTimeInterface');
-		$this->expirationTime = $expiration->getTimestamp() - \time();
+		$this->expiration = $expiration;
 	}
 
 	/**
@@ -56,10 +65,46 @@ class TransientExpiration implements ExpirationInterface {
 	 * @return void
 	 */
 	public function expiresAfter($time): void {
-		$this->expirationTime = (int)$time;
+		$this->expireMethodWasCalled = true;
+		if (\is_null($time)) {
+			$this->expiration = new \DateTime('now +1 year');
+			return;
+		}
+
+		// PSR requirement says that 0 means expired value
+		if ($time === 0) {
+			$time--;
+		}
+
+		if (\is_int($time)) {
+			$this->expiration = new \DateTime('now +' . $time . ' seconds');
+			return;
+		}
+
+		assert('$time instanceof DateInterval');
+		$expiration = new \DateTime();
+		$expiration->add($time);
+		$this->expiration = $expiration;
 	}
 
 	public function expirationInSeconds(): int {
-		return $this->expirationTime;
+		return $this->expiration ? $this->calcExpirationRemainingInSeconds($this->expiration) : 31536000;
+	}
+
+	/**
+	 * @param \DateTimeInterface $expiration
+	 * @return int
+	 */
+	private function calcExpirationRemainingInSeconds(\DateTimeInterface $expiration): int
+	{
+		return $expiration->getTimestamp() - \time();
+	}
+
+	/**
+	 * @return \DateTime
+	 */
+	private function buildDateTimeObject(): \DateTime
+	{
+		return new \DateTime();
 	}
 }
