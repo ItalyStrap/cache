@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests;
 
 use Codeception\TestCase\WPTestCase as WPUnit;
-use PHPUnit\Util\Test as TestUtil;
 
 class WPTestCase extends WPUnit {
 

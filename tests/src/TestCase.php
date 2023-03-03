@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests;
 
 use Codeception\Test\Unit;
-use ItalyStrap\Cache\Driver\Transient;
+use ItalyStrap\Storage\Transient;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 class TestCase extends Unit {

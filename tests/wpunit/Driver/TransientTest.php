@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\WPUnit\Driver;
 
-use ItalyStrap\Cache\Driver\Transient;
+use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\WPTestCase;
 

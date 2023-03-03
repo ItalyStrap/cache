@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests\WPUnit;
 
 use ItalyStrap\Cache\CacheItemPool;
-use ItalyStrap\Cache\Driver\Cache;
 use ItalyStrap\Cache\InMemoryExpiration;
+use ItalyStrap\Storage\Cache;
 use ItalyStrap\Tests\CachePoolTestTrait;
 use ItalyStrap\Tests\WPTestCase;
 use Psr\Cache\CacheItemPoolInterface;

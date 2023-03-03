@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ItalyStrap\Cache\Driver;
-
-use ItalyStrap\Cache\StorageInterface;
+namespace ItalyStrap\Storage;
 
 //* @see \wp_cache_add()
 //* @see \wp_cache_get()

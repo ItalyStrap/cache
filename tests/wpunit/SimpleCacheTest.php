@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\WPUnit;
 
-use ItalyStrap\Cache\Driver\BinaryTransient;
-use ItalyStrap\Cache\Driver\Transient;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryTransient;
+use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\SimpleCacheTestTrait;
 use ItalyStrap\Tests\WPTestCase;
@@ -15,7 +15,7 @@ class SimpleCacheTest extends WPTestCase {
 	use CommonTrait, SimpleCacheTestTrait;
 
 	private function makeInstance(): SimpleCache {
-		$sut = new SimpleCache();
+		$sut = new SimpleCache(new BinaryTransient(new Transient()));
 		return $sut;
 	}
 

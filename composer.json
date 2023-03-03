@@ -51,6 +51,9 @@
         "psr-4": {
             "ItalyStrap\\Cache\\": [
                 "src/"
+            ],
+            "ItalyStrap\\Storage\\": [
+                "storage/"
             ]
         }
     },

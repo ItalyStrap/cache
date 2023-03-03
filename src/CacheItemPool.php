@@ -5,6 +5,7 @@ namespace ItalyStrap\Cache;
 
 use Fig\Cache\BasicPoolTrait;
 use Fig\Cache\KeyValidatorTrait;
+use ItalyStrap\Storage\StorageInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 

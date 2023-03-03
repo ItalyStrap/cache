@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ItalyStrap\Cache\Driver;
-
-use ItalyStrap\Cache\StorageInterface;
+namespace ItalyStrap\Storage;
 
 class BinaryTransient implements StorageInterface {
 

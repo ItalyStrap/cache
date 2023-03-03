@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests\WPUnit;
 
 use ItalyStrap\Cache\CacheItemPool;
-use ItalyStrap\Cache\Driver\BinaryTransient;
-use ItalyStrap\Cache\Driver\Transient;
 use ItalyStrap\Cache\TransientExpiration;
+use ItalyStrap\Storage\BinaryTransient;
+use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CachePoolTestTrait;
 use ItalyStrap\Tests\WPTestCase;
 use Psr\Cache\CacheItemPoolInterface;
