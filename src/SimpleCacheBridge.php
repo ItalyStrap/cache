@@ -31,19 +31,26 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		}
 	}
 
-	public function set($key, $value, $ttl = null) {
-		$item = $this->pool->getItem($key);
+	public function set($key, $value, $ttl = null): bool
+	{
+		try {
+			$item = $this->pool->getItem($key);
+		} catch (InvalidArgumentException $e) {
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+		}
 		$item->set($value);
 		$item->expiresAfter($ttl);
 
 		return $this->pool->save($item);
 	}
 
-	public function delete($key) {
+	public function delete($key): bool
+	{
 		return $this->deleteMultiple([$key]);
 	}
 
-	public function clear() {
+	public function clear(): bool
+	{
 		return $this->pool->clear();
 	}
 
@@ -53,27 +60,42 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		return $this->generateMultipleResultForGetItems($keys, $default);
 	}
 
-	public function setMultiple($values, $ttl = null) {
+	public function setMultiple($values, $ttl = null): bool
+	{
 		$values = $this->toArray($values, 'values');
+		$this->assertKeysAreValid(\array_keys($values));
 
-		$success = true;
 		foreach ( $values as $key => $value ) {
-			if ( $this->set((string)$key, $value, $ttl ) ) {
-				continue;
+			try {
+				$item = $this->pool->getItem($key);
+			} catch (InvalidArgumentException $e) {
+				throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
 			}
-			$success = false;
+			$item->set($value);
+			$item->expiresAfter($ttl);
+
+			$this->pool->saveDeferred($item);
 		}
 
-		return $success;
+		return $this->pool->commit();
 	}
 
-	public function deleteMultiple($keys) {
+	public function deleteMultiple($keys): bool
+	{
 		$keys = $this->toArray($keys);
-		return $this->pool->deleteItems($keys);
+		try {
+			return $this->pool->deleteItems($keys);
+		} catch (InvalidArgumentException $e) {
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+		}
 	}
 
 	public function has($key) {
-		$item = $this->pool->getItem($key);
+		try {
+			$item = $this->pool->getItem($key);
+		} catch (InvalidArgumentException $e) {
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+		}
 		return $item->isHit();
 	}
 
