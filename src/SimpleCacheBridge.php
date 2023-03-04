@@ -31,8 +31,7 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		}
 	}
 
-	public function set($key, $value, $ttl = null): bool
-	{
+	public function set($key, $value, $ttl = null): bool {
 		try {
 			$item = $this->pool->getItem($key);
 		} catch (InvalidArgumentException $e) {
@@ -44,13 +43,11 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		return $this->pool->save($item);
 	}
 
-	public function delete($key): bool
-	{
+	public function delete($key): bool {
 		return $this->deleteMultiple([$key]);
 	}
 
-	public function clear(): bool
-	{
+	public function clear(): bool {
 		return $this->pool->clear();
 	}
 
@@ -60,8 +57,7 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		return $this->generateMultipleResultForGetItems($keys, $default);
 	}
 
-	public function setMultiple($values, $ttl = null): bool
-	{
+	public function setMultiple($values, $ttl = null): bool {
 		$values = $this->toArray($values, 'values');
 		$this->assertKeysAreValid(\array_keys($values));
 
@@ -80,8 +76,7 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		return $this->pool->commit();
 	}
 
-	public function deleteMultiple($keys): bool
-	{
+	public function deleteMultiple($keys): bool {
 		$keys = $this->toArray($keys);
 		try {
 			return $this->pool->deleteItems($keys);
