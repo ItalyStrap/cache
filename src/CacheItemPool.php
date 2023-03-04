@@ -71,6 +71,11 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 	public function deleteItems(array $keys): bool {
 		$has_value = false;
+
+		if (empty($keys)) {
+			return true;
+		}
+
 		foreach ($keys as $key) {
 			$this->validateKey($key);
 			if ($this->hasDeferredItem($key)) {
@@ -106,6 +111,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 			$key = $item->getKey();
 			$this->expiration->withKey($key);
 			$ttl = $this->expiration->expirationInSeconds();
+			// @todo May add \InvalidArgumentException
 			$has_value = $this->storage->set($key, $item->get(), $ttl);
 
 			if ($has_value) {

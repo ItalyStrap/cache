@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Cache;
 
 use ArrayObject;
-use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
+use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
 use Traversable;
 use function get_class;
 use function is_array;
@@ -13,7 +13,6 @@ use function iterator_to_array;
 use function sprintf;
 
 trait ToArrayTrait {
-
 
 	/**
 	 * @param iterable $other
@@ -34,7 +33,7 @@ trait ToArrayTrait {
 			return iterator_to_array($other);
 		}
 
-		throw new InvalidArgumentSimpleCacheException(
+		throw new SimpleCacheInvalidArgumentException(
 			sprintf(
 				'Cache %s must be array or Traversable, "%s" given',
 				$type,

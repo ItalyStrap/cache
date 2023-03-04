@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Cache;
 
-use ItalyStrap\Tests\ConvertDateIntervalToIntegerTrait;
+use Fig\Cache\KeyValidatorTrait;
+use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
 
 /**
@@ -13,7 +15,7 @@ use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
  */
 class SimpleCacheBridge implements PsrSimpleCacheInterface {
 
-	use ConvertDateIntervalToIntegerTrait, ToArrayTrait;
+	use ToArrayTrait, KeyValidatorTrait;
 
 	private CacheItemPoolInterface $pool;
 
@@ -22,18 +24,17 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 	}
 
 	public function get($key, $default = null) {
-		return $this->getMultiple([$key], $default)[$key];
+		try {
+			return $this->pool->getItem($key)->get() ?? $default;
+		} catch (InvalidArgumentException $e) {
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+		}
 	}
 
 	public function set($key, $value, $ttl = null) {
 		$item = $this->pool->getItem($key);
 		$item->set($value);
-//		$ttl = $this->convertDateIntervalToInteger($ttl);
-
-		// The check is to allow SimpleCacheBridgeTest::testGetMultiple pass
-//		if (\is_int($ttl) && $ttl > 0) {
-			$item->expiresAfter($ttl);
-//		}
+		$item->expiresAfter($ttl);
 
 		return $this->pool->save($item);
 	}
@@ -48,16 +49,8 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 
 	public function getMultiple($keys, $default = null): iterable {
 		$keys = $this->toArray($keys);
-		$values = [];
-		/**
-		 * @var string $key
-		 * @var CacheItemInterface $item
-		 */
-		foreach ($this->pool->getItems($keys) as $key => $item) {
-			$values[$key] = $item->get() ?? $default;
-		}
-
-		return $values;
+		$this->assertKeysAreValid($keys);
+		return $this->generateMultipleResultForGetItems($keys, $default);
 	}
 
 	public function setMultiple($values, $ttl = null) {
@@ -82,5 +75,25 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 	public function has($key) {
 		$item = $this->pool->getItem($key);
 		return $item->isHit();
+	}
+
+	private function generateMultipleResultForGetItems(array $keys, $default): iterable {
+		/**
+		 * @var string $key
+		 * @var CacheItemInterface $item
+		 */
+		foreach ($this->pool->getItems($keys) as $key => $item) {
+			yield $key => $item->get() ?? $default;
+		}
+	}
+
+	private function assertKeysAreValid( iterable $keys ): void {
+		try {
+			foreach ($keys as $key) {
+				$this->validateKey($key);
+			}
+		} catch (InvalidArgumentException $e) {
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+		}
 	}
 }

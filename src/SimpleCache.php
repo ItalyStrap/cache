@@ -8,7 +8,7 @@ use DateInterval;
 use DateTime;
 use Exception;
 use Fig\Cache\KeyValidatorTrait;
-use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
+use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
 use ItalyStrap\Storage\StorageInterface;
 use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\ConvertDateIntervalToIntegerTrait;
@@ -153,16 +153,14 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 */
 	private function assertKeyIsValid( $key ): void {
 		if ( ! is_string( $key ) ) {
-			throw new InvalidArgumentSimpleCacheException( sprintf(
+			throw new SimpleCacheInvalidArgumentException( sprintf(
 				'The $key must be a string, %s given',
 				gettype( $key )
 			) );
 		}
 
-//		$this->validateKey($key);
-
 		if ( empty( $key ) ) {
-			throw new InvalidArgumentSimpleCacheException( 'The $key must be not empty' );
+			throw new SimpleCacheInvalidArgumentException( 'The $key must be not empty' );
 		}
 	}
 
