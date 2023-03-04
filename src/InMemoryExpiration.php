@@ -25,7 +25,8 @@ class InMemoryExpiration implements ExpirationInterface {
 		$this->freezeTime = $this->clock->now();
 	}
 
-	public function withKey(string $key): void {}
+	public function withKey(string $key): void {
+	}
 
 	public function isValid(string $key): bool {
 		// If the expiration time is 0 Transient consider it like a no expiration at all.
@@ -47,7 +48,7 @@ class InMemoryExpiration implements ExpirationInterface {
 			return;
 		}
 
-		assert('$expiration instanceof \DateTimeInterface');
+		assert($expiration instanceof \DateTimeInterface);
 		$this->expirationTime = $expiration->getTimestamp() - \time();
 	}
 

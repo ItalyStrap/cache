@@ -28,11 +28,11 @@ class CacheItem implements CacheItemInterface {
 	}
 
 	public function get() {
-		if (!$this->isHit || !$this->expiration->isValid($this->getKey())) {
-			return null;
+		if ($this->isHit()) {
+			return $this->value;
 		}
 
-		return $this->value;
+		return null;
 	}
 
 	public function isHit(): bool {

@@ -12,15 +12,14 @@ use ItalyStrap\Tests\WPTestCase;
 
 class SimpleCacheTest extends WPTestCase {
 
-	use CommonTrait, SimpleCacheTestTrait;
+	use CommonTrait;
 
 	private function makeInstance(): SimpleCache {
 		$sut = new SimpleCache(new BinaryTransient(new Transient()));
 		return $sut;
 	}
 
-	public function createSimpleCache(): SimpleCache
-	{
+	public function createSimpleCache(): SimpleCache {
 		return $this->makeInstance();
 	}
 
@@ -41,7 +40,6 @@ class SimpleCacheTest extends WPTestCase {
 	}
 
 	/**
-	 * @test
 	 */
 	public function deleteTransient() {
 		\set_transient( 'key', 'value' );

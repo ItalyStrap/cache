@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ItalyStrap\Tests\WPUnit\Driver;
+namespace ItalyStrap\Tests\WPUnit\Storage;
 
 use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CommonTrait;

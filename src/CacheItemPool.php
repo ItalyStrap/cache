@@ -44,7 +44,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 		return new CacheItem($key, $this->expiration);
 	}
 
-	public function getItems(array $keys = array()): iterable {
+	public function getItems(array $keys = []): iterable {
 		$collection = [];
 		foreach ($keys as $key) {
 			$collection[$key] = $this->getItem($key);

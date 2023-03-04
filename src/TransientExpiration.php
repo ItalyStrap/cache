@@ -9,12 +9,12 @@ use Psr\Clock\ClockInterface;
 class TransientExpiration implements ExpirationInterface {
 
 	public const TRANSIENT_TIMEOUT_KEY = '_transient_timeout_';
-	public const YEAR_IN_SECONDS = 31536000;
+	public const YEAR_IN_SECONDS = 31_536_000;
 
 	private ClockInterface $clock;
 	private string $key;
 	private int $expirationTime;
-	private bool $expireMethodWasCalled = false;
+	private $expirationValue = null;
 	private ?int $defaultExpiration;
 	/**
 	 * @var DateTimeImmutable|\DateTimeInterface
@@ -37,7 +37,7 @@ class TransientExpiration implements ExpirationInterface {
 	}
 
 	public function isValid(string $key): bool {
-		if (!$this->expireMethodWasCalled) {
+		if (\is_null($this->expirationValue)) {
 			return true;
 		}
 
@@ -50,7 +50,7 @@ class TransientExpiration implements ExpirationInterface {
 	 * @return void
 	 */
 	public function expiresAt($expiration): void {
-		$this->expireMethodWasCalled = true;
+		$this->expirationValue = $expiration;
 		if (\is_null($expiration)) {
 			$this->expiration = new \DateTimeImmutable('now +1 year');
 			return;
@@ -65,7 +65,7 @@ class TransientExpiration implements ExpirationInterface {
 	 * @return void
 	 */
 	public function expiresAfter($time): void {
-		$this->expireMethodWasCalled = true;
+		$this->expirationValue = $time;
 		if (\is_null($time)) {
 			$this->expiration = new \DateTime('now +1 year');
 			return;
@@ -88,23 +88,21 @@ class TransientExpiration implements ExpirationInterface {
 	}
 
 	public function expirationInSeconds(): int {
-		return $this->expiration ? $this->calcExpirationRemainingInSeconds($this->expiration) : 31536000;
+		return $this->expiration ? $this->calcExpirationRemainingInSeconds($this->expiration) : 31_536_000;
 	}
 
 	/**
 	 * @param \DateTimeInterface $expiration
 	 * @return int
 	 */
-	private function calcExpirationRemainingInSeconds(\DateTimeInterface $expiration): int
-	{
+	private function calcExpirationRemainingInSeconds(\DateTimeInterface $expiration): int {
 		return $expiration->getTimestamp() - \time();
 	}
 
 	/**
 	 * @return \DateTime
 	 */
-	private function buildDateTimeObject(): \DateTime
-	{
+	private function buildDateTimeObject(): \DateTime {
 		return new \DateTime();
 	}
 }

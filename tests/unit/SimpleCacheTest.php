@@ -16,7 +16,7 @@ class SimpleCacheTest extends TestCase {
 	use CommonTrait;
 
 	public function makeInstance(): SimpleCache {
-		$sut = new SimpleCache();
+		$sut = new SimpleCache($this->makeStorage());
 		$this->assertInstanceOf( CacheInterface::class, $sut, '' );
 		$this->assertInstanceOf( SimpleCache::class, $sut, '' );
 		return $sut;
