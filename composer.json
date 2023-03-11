@@ -81,6 +81,9 @@
         "infection": [
             "@php ./vendor/bin/infection --threads=4"
         ],
+        "bench": [
+            "@php ./vendor/bin/phpbench run --report=performance"
+        ],
         "psalm": [
             "@php ./vendor/bin/psalm"
         ],
@@ -96,6 +99,9 @@
         ],
         "unit": [
             "@php ./vendor/bin/codecept run unit"
+        ],
+        "unit:coverage": [
+            "@php ./vendor/bin/codecept run unit --coverage-text"
         ],
         "unit:debug": [
             "@unit --debug"
