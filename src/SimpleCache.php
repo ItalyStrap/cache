@@ -77,7 +77,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 			$ttl = $this->convertDateIntervalToInteger($ttl);
 		}
 
-		return $this->storage->set( $key, $value, intval($ttl) );
+		return $this->storage->set( $key, $value, (int)$ttl );
 	}
 
 	/**
@@ -93,6 +93,9 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 * @inheritDoc
 	 */
 	public function getMultiple( $keys, $default = null ) {
+		if (!\is_iterable($keys)) {
+			throw new SimpleCacheInvalidArgumentException( 'Cache keys must be array or Traversable' );
+		}
 		$keys = $this->assertKeysAreValid( $keys );
 
 		$data = [];
@@ -108,6 +111,11 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 * @inheritDoc
 	 */
 	public function setMultiple( $values, $ttl = null ): bool {
+
+		if (!\is_iterable($values)) {
+			throw new SimpleCacheInvalidArgumentException( 'Cache values must be array or Traversable' );
+		}
+
 		$values = $this->toArray($values, 'values');
 
 		$success = true;
@@ -125,6 +133,9 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 * @inheritDoc
 	 */
 	public function deleteMultiple( $keys ): bool {
+		if (!\is_iterable($keys)) {
+			throw new SimpleCacheInvalidArgumentException( 'Cache keys must be array or Traversable' );
+		}
 		$keys = $this->assertKeysAreValid( $keys );
 		$success = true;
 		/** @var string $key */
