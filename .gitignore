@@ -6,3 +6,5 @@
 codeception.yml
 *.lock
 infection.json.dist
+
+*.bat
