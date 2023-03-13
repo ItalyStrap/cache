@@ -81,10 +81,17 @@ class TransientExpiration implements ExpirationInterface {
 			return;
 		}
 
-		assert('$time instanceof DateInterval');
-		$expiration = new \DateTime();
-		$expiration->add($time);
-		$this->expiration = $expiration;
+		if ($time instanceof \DateInterval) {
+			$expiration = new \DateTime();
+			$expiration->add($time);
+			$this->expiration = $expiration;
+			return;
+		}
+
+		throw new \InvalidArgumentException(\sprintf(
+			'$time must be null, integer or an instance of DateInterval, got %s',
+			\gettype($time)
+		));
 	}
 
 	public function expirationInSeconds(): int {

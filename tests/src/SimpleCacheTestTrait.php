@@ -329,7 +329,7 @@ trait SimpleCacheTestTrait {
 			$this->markTestSkipped($this->skippedTests[__FUNCTION__]);
 		}
 
-		$gen = function () {
+		$gen = function (): \Generator {
 			yield 1 => 'key0';
 			yield 1 => 'key1';
 		};

@@ -377,7 +377,7 @@ class SimpleCacheTest extends TestCase {
 			}
 		};
 
-		$this->store = [
+		$values = [
 			'key'	=> 'some-other-value',
 			'key2'	=> 'value 2',
 		];
@@ -392,7 +392,7 @@ class SimpleCacheTest extends TestCase {
 
 		$sut = $this->makeInstance();
 		$multiple = $sut->getMultiple($traversable);
-		$this->assertSame($this->store, $multiple, '');
+		$this->assertSame($values, $multiple, '');
 	}
 
 	/**

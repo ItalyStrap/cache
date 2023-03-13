@@ -32,19 +32,16 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 	}
 
 	public function set($key, $value, $ttl = null): bool {
-		try {
-			$item = $this->pool->getItem($key);
-		} catch (InvalidArgumentException $e) {
-			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
-		}
-		$item->set($value);
-		$item->expiresAfter($ttl);
-
+		$item = $this->setCommonItem($key, $value, $ttl);
 		return $this->pool->save($item);
 	}
 
 	public function delete($key): bool {
-		return $this->deleteMultiple([$key]);
+		try {
+			return $this->pool->deleteItem($key);
+		} catch (InvalidArgumentException $e) {
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+		}
 	}
 
 	public function clear(): bool {
@@ -52,24 +49,30 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 	}
 
 	public function getMultiple($keys, $default = null): iterable {
-		$keys = $this->toArray($keys);
-		$this->assertKeysAreValid($keys);
-		return $this->generateMultipleResultForGetItems($keys, $default);
+		if (!\is_iterable($keys)) {
+			throw new SimpleCacheInvalidArgumentException( 'Cache keys must be array or Traversable' );
+		}
+
+		$gen = function () use ($keys, $default) {
+			foreach ($keys as $key) {
+				try {
+					yield $key => $this->pool->getItem($key)->get() ?? $default;
+				} catch (InvalidArgumentException $e) {
+					throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+				}
+			}
+		};
+
+		return $gen();
 	}
 
 	public function setMultiple($values, $ttl = null): bool {
-		$values = $this->toArray($values, 'values');
-		$this->assertKeysAreValid(\array_keys($values));
+		if (!\is_iterable($values)) {
+			throw new SimpleCacheInvalidArgumentException( 'Cache values must be array or Traversable' );
+		}
 
 		foreach ( $values as $key => $value ) {
-			try {
-				$item = $this->pool->getItem($key);
-			} catch (InvalidArgumentException $e) {
-				throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
-			}
-			$item->set($value);
-			$item->expiresAfter($ttl);
-
+			$item = $this->setCommonItem($key, $value, $ttl);
 			$this->pool->saveDeferred($item);
 		}
 
@@ -77,15 +80,27 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 	}
 
 	public function deleteMultiple($keys): bool {
-		$keys = $this->toArray($keys);
-		try {
-			return $this->pool->deleteItems($keys);
-		} catch (InvalidArgumentException $e) {
-			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+		if (!\is_iterable($keys)) {
+			throw new SimpleCacheInvalidArgumentException( 'Cache keys must be array or Traversable' );
 		}
+
+		$deleted = true;
+		foreach ($keys as $key) {
+			try {
+				$deleted = $this->pool->deleteItem($key);
+			} catch (InvalidArgumentException $e) {
+				throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+			}
+
+			if (!$deleted) {
+				return false;
+			}
+		}
+
+		return $deleted;
 	}
 
-	public function has($key) {
+	public function has($key): bool {
 		try {
 			$item = $this->pool->getItem($key);
 		} catch (InvalidArgumentException $e) {
@@ -94,23 +109,18 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		return $item->isHit();
 	}
 
-	private function generateMultipleResultForGetItems(array $keys, $default): iterable {
-		/**
-		 * @var string $key
-		 * @var CacheItemInterface $item
-		 */
-		foreach ($this->pool->getItems($keys) as $key => $item) {
-			yield $key => $item->get() ?? $default;
-		}
-	}
-
-	private function assertKeysAreValid( iterable $keys ): void {
+	private function setCommonItem($key, $value, $ttl): CacheItemInterface {
 		try {
-			foreach ($keys as $key) {
-				$this->validateKey($key);
-			}
+			$item = $this->pool->getItem($key);
 		} catch (InvalidArgumentException $e) {
 			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
 		}
+		$item->set(\is_object($value) ? clone $value : $value);
+		try {
+			$item->expiresAfter($ttl);
+		} catch (\InvalidArgumentException $e) {
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+		}
+		return $item;
 	}
 }

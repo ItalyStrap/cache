@@ -12,7 +12,9 @@ use Psr\Cache\CacheItemPoolInterface;
 class CacheItemPool implements CacheItemPoolInterface {
 
 	use BasicPoolTrait;
-	use KeyValidatorTrait;
+	use KeyValidatorTrait {
+		validateKey as validateKeyTrait;
+	}
 
 	/** @var array<string, CacheItemInterface> $saved */
 	private array $saved = [];
@@ -33,7 +35,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 	public function getItem($key): CacheItemInterface {
 		$this->validateKey($key);
-		if ($this->hasDeferredItem($key)) {
+		if ($this->hasDeferredItem((string)$key)) {
 			return clone $this->deferred[$key];
 		}
 
@@ -41,7 +43,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 			return clone $this->saved[$key];
 		}
 
-		return new CacheItem($key, $this->expiration);
+		return new CacheItem((string)$key, $this->expiration);
 	}
 
 	public function getItems(array $keys = []): iterable {
@@ -57,7 +59,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 		$this->validateKey($key);
 
 		// check deferred items first
-		if ($this->hasDeferredItem($key)) {
+		if ($this->hasDeferredItem((string)$key)) {
 			return true;
 		}
 
@@ -78,7 +80,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 		foreach ($keys as $key) {
 			$this->validateKey($key);
-			if ($this->hasDeferredItem($key)) {
+			if ($this->hasDeferredItem((string)$key)) {
 				unset($this->deferred[$key]);
 				continue;
 			}
@@ -88,7 +90,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 				continue;
 			}
 
-			$has_value = $this->storage->delete($key);
+			$has_value = $this->storage->delete((string)$key);
 
 			if ($has_value) {
 				unset($this->saved[$key]);
@@ -124,5 +126,13 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 	private function hasDeferredItem(string $key): bool {
 		return \array_key_exists($key, $this->deferred) && $this->expiration->isValid($key);
+	}
+
+	private function validateKey($key): bool {
+		if ($key === 0) {
+			$key = (string)$key;
+		}
+
+		return $this->validateKeyTrait($key);
 	}
 }

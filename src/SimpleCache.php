@@ -111,7 +111,6 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	 * @inheritDoc
 	 */
 	public function setMultiple( $values, $ttl = null ): bool {
-
 		if (!\is_iterable($values)) {
 			throw new SimpleCacheInvalidArgumentException( 'Cache values must be array or Traversable' );
 		}
