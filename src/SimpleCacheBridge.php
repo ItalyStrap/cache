@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Cache;
 
-use Fig\Cache\KeyValidatorTrait;
 use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -14,8 +13,6 @@ use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
  * @psalm-api
  */
 class SimpleCacheBridge implements PsrSimpleCacheInterface {
-
-	use ToArrayTrait, KeyValidatorTrait;
 
 	private CacheItemPoolInterface $pool;
 

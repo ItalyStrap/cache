@@ -4,17 +4,13 @@ declare(strict_types=1);
 namespace ItalyStrap\Cache;
 
 use Fig\Cache\BasicPoolTrait;
-use Fig\Cache\KeyValidatorTrait;
 use ItalyStrap\Storage\StorageInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 class CacheItemPool implements CacheItemPoolInterface {
 
-	use BasicPoolTrait;
-	use KeyValidatorTrait {
-		validateKey as validateKeyTrait;
-	}
+	use BasicPoolTrait, KeyValidatorTrait;
 
 	/** @var array<string, CacheItemInterface> $saved */
 	private array $saved = [];
@@ -126,13 +122,5 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 	private function hasDeferredItem(string $key): bool {
 		return \array_key_exists($key, $this->deferred) && $this->expiration->isValid($key);
-	}
-
-	private function validateKey($key): bool {
-		if ($key === 0) {
-			$key = (string)$key;
-		}
-
-		return $this->validateKeyTrait($key);
 	}
 }

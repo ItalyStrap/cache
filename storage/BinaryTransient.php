@@ -14,6 +14,11 @@ class BinaryTransient implements StorageInterface {
 
 	public function get(string $key, $default = null) {
 		$data = $this->storage->get(...\func_get_args());
+
+		if (!\is_string($data)) {
+			return $data;
+		}
+
 		$decoded = $this->decode($data);
 
 		if ($decoded === false || !mb_check_encoding($decoded, 'ASCII')) {
