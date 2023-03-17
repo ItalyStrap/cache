@@ -15,22 +15,17 @@ class BinaryTransient implements StorageInterface {
 	public function get(string $key, $default = null) {
 		$data = $this->storage->get(...\func_get_args());
 
-		if (!\is_string($data)) {
-			return $data;
+		$generated_key = $this->generateKey($key);
+		if (\is_array($data) && \array_key_exists($generated_key, $data)) {
+			return $this->decode($data[$generated_key]) ?? $data;
 		}
 
-		$decoded = $this->decode($data);
-
-		if ($decoded === false || !mb_check_encoding($decoded, 'ASCII')) {
-			return $data;
-		}
-
-		return $decoded;
+		return $data;
 	}
 
 	public function set(string $key, $value, $ttl = 0): bool {
 		if (\is_string($value) && !mb_check_encoding($value, 'ASCII')) {
-			return $this->storage->set($key, $this->encode($value), $ttl);
+			return $this->storage->set($key, [$this->generateKey($key) => $this->encode($value)], $ttl);
 		}
 
 		return $this->storage->set(...\func_get_args());
@@ -38,7 +33,7 @@ class BinaryTransient implements StorageInterface {
 
 	public function update(string $key, $value, $ttl = 0): bool {
 		if (\is_string($value) && !mb_check_encoding($value, 'ASCII')) {
-			return $this->storage->update($key, $this->encode($value), $ttl);
+			return $this->storage->update($key, [$this->generateKey($key) => $this->encode($value)], $ttl);
 		}
 
 		return $this->storage->update(...\func_get_args());
@@ -56,5 +51,10 @@ class BinaryTransient implements StorageInterface {
 	private function decode(string $value)
 	{
 		return \base64_decode($value, true);
+	}
+
+	private function generateKey(string $key): string
+	{
+		return \md5($key . self::class);
 	}
 }

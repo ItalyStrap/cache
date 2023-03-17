@@ -8,8 +8,6 @@ use Psr\Clock\ClockInterface;
 
 class InMemoryExpiration implements ExpirationInterface {
 
-	public const TRANSIENT_TIMEOUT_KEY = '_transient_timeout_';
-
 	private ClockInterface $clock;
 	private int $expirationTime = 0;
 	private DateTimeImmutable $freezeTime;
@@ -35,7 +33,7 @@ class InMemoryExpiration implements ExpirationInterface {
 		}
 
 		$timeout = $this->freezeTime->getTimestamp() + $this->expirationTime;
-		return (int)$timeout > $this->clock->now()->getTimestamp();
+		return $timeout > $this->clock->now()->getTimestamp();
 	}
 
 	/**

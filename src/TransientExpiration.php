@@ -13,23 +13,20 @@ class TransientExpiration implements ExpirationInterface {
 
 	private ClockInterface $clock;
 	private string $key;
-	private int $expirationTime;
 	private $expirationValue = null;
-	private ?int $defaultExpiration;
+
 	/**
 	 * @var DateTimeImmutable|\DateTimeInterface
 	 */
 	private $expiration;
 
-	public function __construct(ClockInterface $clock = null, int $defaultExpiration = null) {
+	public function __construct(ClockInterface $clock = null) {
 		$this->clock = $clock ?? new class implements ClockInterface {
 
 			public function now(): DateTimeImmutable {
 				return new \DateTimeImmutable('now');
 			}
 		};
-
-		$this->defaultExpiration = $defaultExpiration;
 	}
 
 	public function withKey(string $key): void {
@@ -56,8 +53,15 @@ class TransientExpiration implements ExpirationInterface {
 			return;
 		}
 
-		assert('$expiration instanceof \DateTimeInterface');
-		$this->expiration = $expiration;
+		if ($expiration instanceof \DateTimeInterface) {
+			$this->expiration = $expiration;
+			return;
+		}
+
+		throw new \InvalidArgumentException(\sprintf(
+			'$expiration must be null or an instance of DateTimeInterface, got %s',
+			\gettype($expiration)
+		));
 	}
 
 	/**
@@ -82,9 +86,7 @@ class TransientExpiration implements ExpirationInterface {
 		}
 
 		if ($time instanceof \DateInterval) {
-			$expiration = new \DateTime();
-			$expiration->add($time);
-			$this->expiration = $expiration;
+			$this->expiration = (new \DateTime())->add($time);
 			return;
 		}
 
@@ -95,21 +97,6 @@ class TransientExpiration implements ExpirationInterface {
 	}
 
 	public function expirationInSeconds(): int {
-		return $this->expiration ? $this->calcExpirationRemainingInSeconds($this->expiration) : 31_536_000;
-	}
-
-	/**
-	 * @param \DateTimeInterface $expiration
-	 * @return int
-	 */
-	private function calcExpirationRemainingInSeconds(\DateTimeInterface $expiration): int {
-		return $expiration->getTimestamp() - \time();
-	}
-
-	/**
-	 * @return \DateTime
-	 */
-	private function buildDateTimeObject(): \DateTime {
-		return new \DateTime();
+		return $this->expiration ? $this->expiration->getTimestamp() - \time() : 31_536_000;
 	}
 }

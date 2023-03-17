@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests\WPUnit;
 
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Cache\TransientExpiration;
 use ItalyStrap\Storage\BinaryTransient;
 use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CommonTrait;
@@ -16,15 +17,15 @@ class SimpleCacheTest extends WPTestCase {
 
 	private array $skippedTests = [
 //		'testSet' => 'Not passed test',
-		'testSetTtl' => 'Not passed test',
-		'testSetExpiredTtl' => 'Not passed test',
+//		'testSetTtl' => 'Not passed test',
+//		'testSetExpiredTtl' => 'Not passed test',
 //		'testGet' => 'Not passed test',
 //		'testDelete' => 'Not passed test',
 //		'testClear' => 'Not passed test',
 //		'testSetMultiple' => 'Not passed test',
 //		'testSetMultipleWithIntegerArrayKey' => 'Not passed test',
-		'testSetMultipleTtl' => 'Not passed test',
-		'testSetMultipleExpiredTtl' => 'Not passed test',
+//		'testSetMultipleTtl' => 'Not passed test',
+//		'testSetMultipleExpiredTtl' => 'Not passed test',
 //		'testSetMultipleWithGenerator' => 'Not passed test',
 //		'testGetMultiple' => 'Not passed test',
 //		'testGetMultipleWithGenerator' => 'Not passed test',
@@ -42,16 +43,16 @@ class SimpleCacheTest extends WPTestCase {
 //		'testDeleteInvalidKeys' => 'Not passed test',
 //		'testDeleteMultipleInvalidKeys' => 'Not passed test',
 //		'testDeleteMultipleNoIterable' => 'Not passed test',
-		'testSetInvalidTtl' => 'Not passed test',
-		'testSetMultipleInvalidTtl' => 'Not passed test',
+//		'testSetInvalidTtl' => 'Not passed test',
+//		'testSetMultipleInvalidTtl' => 'Not passed test',
 //		'testNullOverwrite' => 'Not passed test',
 //		'testDataTypeString' => 'Not passed test',
 //		'testDataTypeInteger' => 'Not passed test',
 //		'testDataTypeFloat' => 'Not passed test',
-		'testDataTypeBoolean' => 'Not passed test',
+//		'testDataTypeBoolean' => 'Not passed test',
 //		'testDataTypeArray' => 'Not passed test',
 //		'testDataTypeObject' => 'Not passed test',
-		'testBinaryData' => 'Not passed test',
+//		'testBinaryData' => 'Not passed test',
 //		'testSetValidKeys' => 'Not passed test',
 //		'testSetMultipleValidKeys' => 'Not passed test',
 //		'testSetValidData' => 'Not passed test',
@@ -61,7 +62,7 @@ class SimpleCacheTest extends WPTestCase {
 	];
 
 	private function makeInstance(): SimpleCache {
-		$sut = new SimpleCache(new BinaryTransient(new Transient()));
+		$sut = new SimpleCache(new BinaryTransient(new Transient()), new TransientExpiration());
 		return $sut;
 	}
 
@@ -88,9 +89,17 @@ class SimpleCacheTest extends WPTestCase {
 	/**
 	 * @test
 	 */
-	public function getTransientfddf() {
+	public function getRealTransient() {
 		\set_transient( 'key', false );
 		$this->assertSame(false, \get_transient('key'), '');
+	}
+
+	/**
+	 * @test
+	 */
+	public function getValueFromNotPrevSetTransient() {
+		$sut = $this->makeInstance();
+		$this->assertSame(null, $sut->get('some-not-stored-key'), 'Should return null is a value is not set');
 	}
 
 	/**
@@ -101,6 +110,28 @@ class SimpleCacheTest extends WPTestCase {
 		$this->makeInstance()->delete('key');
 		$this->assertFalse(\get_transient('key'), '');
 		$this->assertNull($this->makeInstance()->get('key'), '');
+	}
+	/**
+	 */
+	public function testImplementation() {
+		$data = '';
+		for ($i = 0; $i < 256; $i++) {
+			$data .= chr($i);
+		}
+
+		$key = 'key';
+		\add_filter("transient_$key", function ($value) use ($key, $data) {
+			$generated_key = \md5($key . BinaryTransient::class);
+			return [$generated_key => base64_encode($data)];
+		});
+
+		$sut = $this->makeInstance();
+		if ( null === ( $value = $sut->get( $key ) ) ) {
+			$sut->set($key, $data);
+			$this->fail('It should not be reached.');
+		}
+
+		$this->assertSame($data, $value, '');
 	}
 
 	public function testBasicUsageWithLongKey() {
