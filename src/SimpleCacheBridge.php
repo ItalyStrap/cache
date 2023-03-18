@@ -47,12 +47,22 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		return $this->pool->clear();
 	}
 
+	/**
+	 * @param mixed $keys
+	 * @param mixed $default
+	 * @psalm-return \Generator<mixed, mixed|null, mixed, never>
+	 */
 	public function getMultiple($keys, $default = null): iterable {
 		if (!\is_iterable($keys)) {
 			throw new SimpleCacheInvalidArgumentException( 'Cache keys must be array or Traversable' );
 		}
 
-		$gen = function () use ($keys, $default) {
+		$gen =
+			/**
+			 * @psalm-return \Generator<mixed, mixed|null, mixed, never>
+			 */
+		function () use ($keys, $default): \Generator {
+			/** @var string[] $keys */
 			foreach ($keys as $key) {
 				/** @psalm-suppress InvalidCatch */
 				try {
@@ -66,11 +76,20 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		return $gen();
 	}
 
+	/**
+	 * @param mixed $values
+	 * @param \DateInterval|int|null $ttl
+	 * @return bool
+	 */
 	public function setMultiple($values, $ttl = null): bool {
 		if (!\is_iterable($values)) {
 			throw new SimpleCacheInvalidArgumentException( 'Cache values must be array or Traversable' );
 		}
 
+		/**
+		 * @var string $key
+		 * @var mixed $value
+		 */
 		foreach ( $values as $key => $value ) {
 			$item = $this->setCommonItem($key, $value, $ttl);
 			$this->pool->saveDeferred($item);
@@ -79,12 +98,17 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 		return $this->pool->commit();
 	}
 
+	/**
+	 * @param iterable|mixed $keys
+	 * @return bool
+	 */
 	public function deleteMultiple($keys): bool {
 		if (!\is_iterable($keys)) {
 			throw new SimpleCacheInvalidArgumentException( 'Cache keys must be array or Traversable' );
 		}
 
 		$deleted = true;
+		/** @var string[] $keys */
 		foreach ($keys as $key) {
 			/** @psalm-suppress InvalidCatch */
 			try {

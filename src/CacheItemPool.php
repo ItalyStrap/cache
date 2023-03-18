@@ -9,6 +9,9 @@ use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
 
+/**
+ * @psalm-api
+ */
 class CacheItemPool implements CacheItemPoolInterface {
 
 	use BasicPoolTrait, KeyValidatorTrait;
@@ -21,6 +24,11 @@ class CacheItemPool implements CacheItemPoolInterface {
 	private CacheInterface $storage;
 	private ExpirationInterface $expiration;
 
+	/**
+	 * @param CacheInterface $storage
+	 * @param ExpirationInterface $expiration
+	 * @psalm-suppress PossiblyUnusedMethod
+	 */
 	public function __construct(CacheInterface $storage, ExpirationInterface $expiration) {
 		$this->storage = $storage;
 		$this->expiration = $expiration;
@@ -32,6 +40,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 	public function getItem($key): CacheItemInterface {
 		$this->validateKey($key);
+		/** @psalm-suppress RedundantCastGivenDocblockType */
 		if ($this->hasDeferredItem((string)$key)) {
 			return clone $this->deferred[$key];
 		}
@@ -40,6 +49,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 			return clone $this->saved[$key];
 		}
 
+		/** @psalm-suppress RedundantCastGivenDocblockType */
 		return new CacheItem((string)$key, $this->storage, $this->expiration);
 	}
 
@@ -53,6 +63,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 		$this->validateKey($key);
 
 		// check deferred items first
+		/** @psalm-suppress RedundantCastGivenDocblockType */
 		if ($this->hasDeferredItem((string)$key)) {
 			return true;
 		}
@@ -65,29 +76,34 @@ class CacheItemPool implements CacheItemPoolInterface {
 		return true;
 	}
 
-	public function deleteItems(array $keys): bool {
+	/**
+	 * @param array<array-key, mixed> $items
+	 * @return bool
+	 */
+	public function deleteItems(array $items): bool {
 		$has_value = false;
 
-		if (empty($keys)) {
+		if (empty($items)) {
 			return true;
 		}
 
-		foreach ($keys as $key) {
-			$this->validateKey($key);
-			if ($this->hasDeferredItem((string)$key)) {
-				unset($this->deferred[$key]);
+		/** @var mixed $item */
+		foreach ($items as $item) {
+			$this->validateKey($item);
+			if ($this->hasDeferredItem((string)$item)) {
+				unset($this->deferred[(string)$item]);
 				continue;
 			}
 
-			if (!\array_key_exists($key, $this->saved)) {
+			if (!\array_key_exists((string)$item, $this->saved)) {
 				$has_value = true;
 				continue;
 			}
 
-			$has_value = $this->storage->delete((string)$key);
+			$has_value = $this->storage->delete((string)$item);
 
 			if ($has_value) {
-				unset($this->saved[$key]);
+				unset($this->saved[(string)$item]);
 			}
 		}
 
@@ -95,6 +111,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 	}
 
 	public function clear(): bool {
+		/** @psalm-suppress InvalidCatch */
 		try {
 			$this->deleteItems(\array_keys($this->saved));
 		} catch (InvalidArgumentException $e) {

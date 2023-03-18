@@ -6,6 +6,9 @@ namespace ItalyStrap\Cache;
 use DateTimeImmutable;
 use Psr\Clock\ClockInterface;
 
+/**
+ * @psalm-api
+ */
 class InMemoryExpiration implements ExpirationInterface {
 
 	private ClockInterface $clock;
@@ -55,6 +58,11 @@ class InMemoryExpiration implements ExpirationInterface {
 	 * @return void
 	 */
 	public function expiresAfter($time): void {
+		if ($time instanceof \DateInterval) {
+			$this->expirationTime = (new \DateTimeImmutable())->add($time)->getTimestamp();
+			return;
+		}
+
 		$this->expirationTime = (int)$time;
 	}
 

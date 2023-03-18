@@ -27,7 +27,8 @@ class TransientExpiration implements ExpirationInterface {
 		$this->expiration = null;
 	}
 
-	public function withKey(string $key): void {}
+	public function withKey(string $key): void {
+	}
 
 	public function isValid(string $key): bool {
 		if ($this->expirationInSeconds() > 0) {

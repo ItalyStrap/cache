@@ -5,7 +5,7 @@ namespace ItalyStrap\Cache;
 
 interface ExpirationInterface {
 
-	public function withKey(string $key);
+	public function withKey(string $key): void;
 
 	public function isValid(string $key): bool;
 

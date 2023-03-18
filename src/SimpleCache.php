@@ -6,7 +6,11 @@ namespace ItalyStrap\Cache;
 use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
 use ItalyStrap\Storage\CacheInterface;
 use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
+/**
+ * @psalm-api
+ */
 class SimpleCache implements PsrSimpleCacheInterface {
 
 	use KeyValidatorTrait;
@@ -25,9 +29,14 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		return $this->get( $key ) !== null;
 	}
 
+	/**
+	 * @param mixed $key
+	 * @param mixed $default
+	 * @return bool|mixed|null
+	 */
 	public function get( $key, $default = null ) {
 		$this->assertKeyIsValid( $key );
-		$this->addUsedKey( $key );
+		$this->addUsedKey( (string)$key );
 
 		/**
 		 * This is a bit tricky because transient return false not as value but
@@ -36,18 +45,25 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		 * This should be almost safe.
 		 * Normally you do something like this: `false === get_transient('some-key')`
 		 * With this you simply call SimpleCache::has('some-key');
+		 * @var mixed $value
 		 */
-		$value = $this->storage->get( $key );
-		if (\array_key_exists($key, $this->type) && $this->type[$key] === 'boolean') {
+		$value = $this->storage->get( (string)$key );
+		if (\array_key_exists((string)$key, $this->type) && $this->type[(string)$key] === 'boolean') {
 			return (bool)$value;
 		}
 
 		return $value ?: $default;
 	}
 
+	/**
+	 * @param mixed $key
+	 * @param mixed $value
+	 * @param \DateInterval|int|null $ttl
+	 * @return bool
+	 */
 	public function set( $key, $value, $ttl = null ): bool {
 		$this->assertKeyIsValid( $key );
-		$this->addUsedKey( $key );
+		$this->addUsedKey( (string)$key );
 		$this->addValueType( (string)$key, $value );
 
 		try {
@@ -56,9 +72,11 @@ class SimpleCache implements PsrSimpleCacheInterface {
 			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
 		}
 
-		$ttl = $this->expiration->expirationInSeconds();
-
-		return $this->storage->set( (string)$key, \is_object($value) ? clone $value : $value, (int)$ttl );
+		return $this->storage->set(
+			(string)$key,
+			\is_object($value) ? clone $value : $value,
+			$this->expiration->expirationInSeconds()
+		);
 	}
 
 	public function delete( $key ): bool {
@@ -72,25 +90,49 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		return $this->storage->delete( $key );
 	}
 
+	/**
+	 * @param mixed $keys
+	 * @param mixed $default
+	 * @psalm-return \Generator<mixed, mixed|null, mixed, never>
+	 */
 	public function getMultiple( $keys, $default = null ): iterable {
 		if (!\is_iterable($keys)) {
 			throw new SimpleCacheInvalidArgumentException( 'Cache keys must be array or Traversable' );
 		}
 
-		$gen = function () use ($keys, $default) {
+		$gen =
+			/**
+			 * @psalm-return \Generator<mixed, mixed|null, mixed, never>
+			 */
+		function () use ($keys, $default): \Generator {
+			/** @var string[] $keys */
 			foreach ($keys as $key) {
-				yield $key => $this->get( $key, $default );
+				/** @psalm-suppress InvalidCatch */
+				try {
+					yield $key => $this->get($key, $default);
+				} catch (InvalidArgumentException $e) {
+					throw new SimpleCacheInvalidArgumentException($e->getMessage(), (int)$e->getCode());
+				}
 			}
 		};
 
 		return $gen();
 	}
 
+	/**
+	 * @param mixed $values
+	 * @param \DateInterval|int|null $ttl
+	 * @return bool
+	 */
 	public function setMultiple( $values, $ttl = null ): bool {
 		if (!\is_iterable($values)) {
 			throw new SimpleCacheInvalidArgumentException( 'Cache values must be array or Traversable' );
 		}
 
+		/**
+		 * @var string $key
+		 * @var mixed $value
+		 */
 		foreach ( $values as $key => $value ) {
 			if ( $this->set($key, $value, $ttl ) ) {
 				continue;
@@ -101,12 +143,16 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		return true;
 	}
 
+	/**
+	 * @param iterable|mixed $keys
+	 * @return bool
+	 */
 	public function deleteMultiple( $keys ): bool {
 		if (!\is_iterable($keys)) {
 			throw new SimpleCacheInvalidArgumentException( 'Cache keys must be array or Traversable' );
 		}
 
-		/** @var string $key */
+		/** @var string[] $keys */
 		foreach ( $keys as $key ) {
 			if ( $this->delete( $key ) ) {
 				continue;
@@ -121,6 +167,10 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		return $this->deleteMultiple( $this->usedKeys() );
 	}
 
+	/**
+	 * @param mixed $key
+	 * @return void
+	 */
 	private function assertKeyIsValid( $key ): void {
 		try {
 			$this->validateKey($key);
@@ -129,10 +179,18 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		}
 	}
 
+	/**
+	 * @param string|int $key
+	 * @return void
+	 */
 	private function addUsedKey( $key ): void {
 		$this->used_keys[ $key ] = $key;
 	}
 
+	/**
+	 * @param string|int $key
+	 * @return void
+	 */
 	private function deleteUsedKey( $key ): void {
 		unset( $this->used_keys[ $key ] );
 	}
@@ -141,6 +199,11 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		return $this->used_keys;
 	}
 
+	/**
+	 * @param string $key
+	 * @param mixed $value
+	 * @return void
+	 */
 	private function addValueType(string $key, $value): void {
 		$this->type[$key] = \gettype($value);
 	}

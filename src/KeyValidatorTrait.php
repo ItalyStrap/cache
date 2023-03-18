@@ -9,11 +9,18 @@ trait KeyValidatorTrait {
 		validateKey as validateKeyTrait;
 	}
 
+	/**
+	 * @param mixed $key
+	 * @return bool
+	 */
 	private function validateKey($key): bool {
 		if ($key === 0) {
-			$key = (string)$key;
+			$key = '0';
 		}
 
+		/**
+		 * @psalm-suppress MixedArgument
+		 */
 		return $this->validateKeyTrait($key);
 	}
 }
