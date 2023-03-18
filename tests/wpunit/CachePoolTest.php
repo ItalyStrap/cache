@@ -28,12 +28,12 @@ class CachePoolTest extends WPTestCase {
 //		'testDeleteItems' => 'Void adapter does not save items.',
 //		'testSave' => 'Void adapter does not save items.',
 //		'testSaveExpired' => 'Void adapter does not save items.',
-		'testSaveWithoutExpire' => 'Cache should have retrieved the items',
+//		'testSaveWithoutExpire' => 'Cache should have retrieved the items',
 //		'testDeferredSave' => 'Void adapter does not save items.',
 //		'testDeferredExpired' => 'Void adapter does not save items.',
 //		'testDeleteDeferredItem' => 'Void adapter does not save items.',
 
-		'testDeferredSaveWithoutCommit' => 'A deferred item should automatically be committed on CachePool::__destruct().',
+//		'testDeferredSaveWithoutCommit' => 'A deferred item should automatically be committed on CachePool::__destruct().',
 
 //		'testCommit' => 'Void adapter does not save items.',
 //		'testExpiration' => 'Void adapter does not save items.',
@@ -93,5 +93,18 @@ class CachePoolTest extends WPTestCase {
 		$this->assertTrue($pool_was_called, '');
 		$this->assertSame($this->cache_key, $item->getKey(), '');
 		$this->assertSame(\wp_cache_get($this->cache_key), $item->get(), '');
+	}
+
+	/**
+	 * @dataProvider invalidKeys
+	 */
+	public function testGetItemsInvalidKeys($key) {
+		if (isset($this->skippedTests[__FUNCTION__])) {
+			$this->markTestSkipped($this->skippedTests[__FUNCTION__]);
+		}
+
+		$this->expectException('Psr\Cache\InvalidArgumentException');
+		$items = $this->cache->getItems(['key1', $key, 'key2']);
+		foreach ($items as $item) {}
 	}
 }

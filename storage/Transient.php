@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Storage;
 
-class Transient implements StorageInterface {
+class Transient implements CacheInterface {
 
 	public function get(string $key, $default = null) {
 		$this->assertKeyLength($key);

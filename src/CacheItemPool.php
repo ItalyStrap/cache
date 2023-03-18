@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace ItalyStrap\Cache;
 
 use Fig\Cache\BasicPoolTrait;
-use ItalyStrap\Storage\StorageInterface;
+use ItalyStrap\Storage\CacheInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 
 class CacheItemPool implements CacheItemPoolInterface {
 
@@ -17,10 +18,10 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 	/** @var array<string, CacheItemInterface> $deferred */
 	protected $deferred = [];
-	private StorageInterface $storage;
+	private CacheInterface $storage;
 	private ExpirationInterface $expiration;
 
-	public function __construct(StorageInterface $storage, ExpirationInterface $expiration) {
+	public function __construct(CacheInterface $storage, ExpirationInterface $expiration) {
 		$this->storage = $storage;
 		$this->expiration = $expiration;
 	}
@@ -35,20 +36,17 @@ class CacheItemPool implements CacheItemPoolInterface {
 			return clone $this->deferred[$key];
 		}
 
-		if (\array_key_exists($key, $this->saved)) {
+		if (\array_key_exists($key, $this->saved) && $this->saved[$key]->isHit()) {
 			return clone $this->saved[$key];
 		}
 
-		return new CacheItem((string)$key, $this->expiration);
+		return new CacheItem((string)$key, $this->storage, $this->expiration);
 	}
 
 	public function getItems(array $keys = []): iterable {
-		$collection = [];
 		foreach ($keys as $key) {
-			$collection[$key] = $this->getItem($key);
+			yield $key => $this->getItem($key);
 		}
-
-		return $collection;
 	}
 
 	public function hasItem($key): bool {
@@ -59,7 +57,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 			return true;
 		}
 
-		return \array_key_exists($key, $this->saved) && $this->expiration->isValid($key);
+		return \array_key_exists($key, $this->saved) && $this->saved[$key]->isHit();
 	}
 
 	public function saveDeferred(CacheItemInterface $item): bool {
@@ -97,7 +95,11 @@ class CacheItemPool implements CacheItemPoolInterface {
 	}
 
 	public function clear(): bool {
-		$this->deleteItems(\array_keys($this->saved));
+		try {
+			$this->deleteItems(\array_keys($this->saved));
+		} catch (InvalidArgumentException $e) {
+			return false;
+		}
 		$this->saved = [];
 		$this->deferred = [];
 
@@ -121,6 +123,6 @@ class CacheItemPool implements CacheItemPoolInterface {
 	}
 
 	private function hasDeferredItem(string $key): bool {
-		return \array_key_exists($key, $this->deferred) && $this->expiration->isValid($key);
+		return \array_key_exists($key, $this->deferred) && $this->deferred[$key]->isHit();
 	}
 }

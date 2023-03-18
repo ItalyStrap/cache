@@ -4,19 +4,19 @@ declare(strict_types=1);
 namespace ItalyStrap\Cache;
 
 use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
-use ItalyStrap\Storage\StorageInterface;
+use ItalyStrap\Storage\CacheInterface;
 use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
 
 class SimpleCache implements PsrSimpleCacheInterface {
 
 	use ToArrayTrait, KeyValidatorTrait;
 
-	private StorageInterface $storage;
+	private CacheInterface $storage;
 	private array $used_keys = [];
 	private array $type = [];
 	private ExpirationInterface $expiration;
 
-	public function __construct(StorageInterface $storage, ExpirationInterface $expiration) {
+	public function __construct(CacheInterface $storage, ExpirationInterface $expiration) {
 		$this->storage = $storage;
 		$this->expiration = $expiration;
 	}

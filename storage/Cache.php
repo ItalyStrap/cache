@@ -8,7 +8,7 @@ namespace ItalyStrap\Storage;
 //* @see \wp_cache_set()
 //* @see \wp_cache_delete()
 //* @see \wp_cache_flush()
-class Cache implements StorageInterface {
+class Cache implements CacheInterface {
 
 	public function get(string $key, $default = null) {
 		return \wp_cache_get($key, 'default') ?? $default;

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Storage;
 
-interface StorageInterface {
+interface CacheInterface {
 
 	/**
 	 * @param string $key

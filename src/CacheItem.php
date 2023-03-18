@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Cache;
 
+use ItalyStrap\Storage\CacheInterface;
 use Psr\Cache\CacheItemInterface;
 
 class CacheItem implements CacheItemInterface {
@@ -16,9 +17,10 @@ class CacheItem implements CacheItemInterface {
 	private $value;
 	private ExpirationInterface $expiration;
 
-	public function __construct(string $key, ExpirationInterface $expiration) {
+	public function __construct(string $key, CacheInterface $storage, ExpirationInterface $expiration) {
 		$this->key = $key;
-		$this->isHit = false;
+		$this->value = $storage->get($key);
+		$this->isHit = (bool)$this->value;
 		$expiration->withKey($key);
 		$this->expiration = $expiration;
 	}

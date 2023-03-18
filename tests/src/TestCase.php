@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests;
 
 use Codeception\Test\Unit;
-use ItalyStrap\Storage\StorageInterface;
+use ItalyStrap\Storage\CacheInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 class TestCase extends Unit {
@@ -23,14 +23,14 @@ class TestCase extends Unit {
 
 	protected \Prophecy\Prophecy\ObjectProphecy $storage;
 
-	public function makeStorage(): StorageInterface {
+	public function makeStorage(): CacheInterface {
 		return $this->storage->reveal();
 	}
 
 	// phpcs:ignore
 	protected function _before() {
 
-		$this->storage = $this->prophesize(StorageInterface::class);
+		$this->storage = $this->prophesize(CacheInterface::class);
 
 		$this->defineFunction('get_transient', function ( string $key ) {
 			return $this->store[ $key ] ?? false;

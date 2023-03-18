@@ -121,7 +121,7 @@ class SimpleCacheTest extends WPTestCase {
 
 		$key = 'key';
 		\add_filter("transient_$key", function ($value) use ($key, $data) {
-			$generated_key = \md5($key . BinaryTransient::class);
+			$generated_key = \md5(BinaryTransient::class . $key);
 			return [$generated_key => base64_encode($data)];
 		});
 

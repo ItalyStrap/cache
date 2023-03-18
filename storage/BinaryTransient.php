@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Storage;
 
-class BinaryTransient implements StorageInterface {
+class BinaryTransient implements CacheInterface {
 
-	private StorageInterface $storage;
+	private CacheInterface $storage;
 
-	public function __construct(StorageInterface $storage)
+	public function __construct(CacheInterface $storage)
 	{
 		$this->storage = $storage;
 	}
@@ -23,6 +23,12 @@ class BinaryTransient implements StorageInterface {
 		return $data;
 	}
 
+	/**
+	 * To store some binary data I tried some code, but I end up
+	 * to save the binary in an array with a generated key, so
+	 * it is more simple to access later with the `BinaryTransient::get()` method.
+	 * If you have a better solution for this please go on and make a PR.
+	 */
 	public function set(string $key, $value, $ttl = 0): bool {
 		if (\is_string($value) && !mb_check_encoding($value, 'ASCII')) {
 			return $this->storage->set($key, [$this->generateKey($key) => $this->encode($value)], $ttl);
@@ -53,8 +59,12 @@ class BinaryTransient implements StorageInterface {
 		return \base64_decode($value, true);
 	}
 
+	/**
+	 * The generated key should be almost safe
+	 * because we append a class name prefix to the key.
+	 */
 	private function generateKey(string $key): string
 	{
-		return \md5($key . self::class);
+		return \md5(self::class . $key);
 	}
 }
