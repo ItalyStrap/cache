@@ -16,9 +16,9 @@
  *
  * @SuppressWarnings(PHPMD)
 */
-class WpunitTester extends \Codeception\Actor
+class WPUnitTester extends \Codeception\Actor
 {
-    use _generated\WpunitTesterActions;
+    use _generated\WPUnitTesterActions;
 
    /**
     * Define custom actions here

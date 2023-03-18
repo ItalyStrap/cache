@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests\Unit;
 
 use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
+use ItalyStrap\Cache\InMemoryExpiration;
 use ItalyStrap\Cache\SimpleCache;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\TestCase;
@@ -15,7 +16,7 @@ class SimpleCacheTest extends TestCase {
 	use CommonTrait;
 
 	public function makeInstance(): SimpleCache {
-		$sut = new SimpleCache($this->makeStorage());
+		$sut = new SimpleCache($this->makeStorage(), new InMemoryExpiration());
 		$this->assertInstanceOf( CacheInterface::class, $sut, '' );
 		$this->assertInstanceOf( SimpleCache::class, $sut, '' );
 		return $sut;
