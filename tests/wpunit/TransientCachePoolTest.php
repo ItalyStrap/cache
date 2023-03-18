@@ -116,7 +116,8 @@ class TransientCachePoolTest extends WPTestCase {
 
 		$this->expectException('Psr\Cache\InvalidArgumentException');
 		$items = $this->cache->getItems(['key1', $key, 'key2']);
-		foreach ($items as $item) {}
+		foreach ($items as $item) {
+		}
 	}
 
 	/**

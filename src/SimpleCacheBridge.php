@@ -21,10 +21,11 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 	}
 
 	public function get($key, $default = null) {
+		/** @psalm-suppress InvalidCatch */
 		try {
 			return $this->pool->getItem($key)->get() ?? $default;
 		} catch (InvalidArgumentException $e) {
-			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), (int)$e->getCode());
 		}
 	}
 
@@ -34,10 +35,11 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 	}
 
 	public function delete($key): bool {
+		/** @psalm-suppress InvalidCatch */
 		try {
 			return $this->pool->deleteItem($key);
 		} catch (InvalidArgumentException $e) {
-			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), (int)$e->getCode());
 		}
 	}
 
@@ -52,10 +54,11 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 
 		$gen = function () use ($keys, $default) {
 			foreach ($keys as $key) {
+				/** @psalm-suppress InvalidCatch */
 				try {
 					yield $key => $this->pool->getItem($key)->get() ?? $default;
 				} catch (InvalidArgumentException $e) {
-					throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+					throw new SimpleCacheInvalidArgumentException($e->getMessage(), (int)$e->getCode());
 				}
 			}
 		};
@@ -83,10 +86,11 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 
 		$deleted = true;
 		foreach ($keys as $key) {
+			/** @psalm-suppress InvalidCatch */
 			try {
 				$deleted = $this->pool->deleteItem($key);
 			} catch (InvalidArgumentException $e) {
-				throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+				throw new SimpleCacheInvalidArgumentException($e->getMessage(), (int)$e->getCode());
 			}
 
 			if (!$deleted) {
@@ -98,26 +102,32 @@ class SimpleCacheBridge implements PsrSimpleCacheInterface {
 	}
 
 	public function has($key): bool {
+		/** @psalm-suppress InvalidCatch */
 		try {
-			$item = $this->pool->getItem($key);
+			return $this->pool->getItem($key)->isHit();
 		} catch (InvalidArgumentException $e) {
-			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), (int)$e->getCode());
 		}
-		return $item->isHit();
 	}
 
+	/**
+	 * @param string $key
+	 * @param mixed $value
+	 * @param \DateInterval|int|null $ttl
+	 * @return CacheItemInterface
+	 * @psalm-suppress InvalidCatch
+	 */
 	private function setCommonItem($key, $value, $ttl): CacheItemInterface {
 		try {
 			$item = $this->pool->getItem($key);
-		} catch (InvalidArgumentException $e) {
-			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
-		}
-		$item->set(\is_object($value) ? clone $value : $value);
-		try {
+			$item->set(\is_object($value) ? clone $value : $value);
 			$item->expiresAfter($ttl);
+		} catch (InvalidArgumentException $e) {
+			throw new SimpleCacheInvalidArgumentException($e->getMessage(), (int)$e->getCode());
 		} catch (\InvalidArgumentException $e) {
 			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
 		}
+
 		return $item;
 	}
 }

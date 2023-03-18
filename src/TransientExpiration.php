@@ -6,40 +6,36 @@ namespace ItalyStrap\Cache;
 use DateTimeImmutable;
 use Psr\Clock\ClockInterface;
 
+/**
+ * @psalm-api
+ */
 class TransientExpiration implements ExpirationInterface {
 
 	public const TRANSIENT_TIMEOUT_KEY = '_transient_timeout_';
 	public const YEAR_IN_SECONDS = 31_536_000;
 
 	private ClockInterface $clock;
-	private string $key;
-	private $expirationValue = null;
-
-	/**
-	 * @var DateTimeImmutable|\DateTimeInterface
-	 */
-	private $expiration;
+	private ?\DateTimeInterface $expiration;
 
 	public function __construct(ClockInterface $clock = null) {
 		$this->clock = $clock ?? new class implements ClockInterface {
-
 			public function now(): DateTimeImmutable {
 				return new \DateTimeImmutable('now');
 			}
 		};
+
+		$this->expiration = null;
 	}
 
-	public function withKey(string $key): void {
-		$this->key = $key;
-	}
+	public function withKey(string $key): void {}
 
 	public function isValid(string $key): bool {
-		if (\is_null($this->expirationValue)) {
+		if ($this->expirationInSeconds() > 0) {
 			return true;
 		}
 
-		$timeout = \get_option(self::TRANSIENT_TIMEOUT_KEY . $this->key);
-		return (int)$timeout > $this->clock->now()->getTimestamp();
+		$timeout = (int)\get_option(self::TRANSIENT_TIMEOUT_KEY . $key);
+		return $timeout > $this->clock->now()->getTimestamp();
 	}
 
 	/**
@@ -47,7 +43,6 @@ class TransientExpiration implements ExpirationInterface {
 	 * @return void
 	 */
 	public function expiresAt($expiration): void {
-		$this->expirationValue = $expiration;
 		if (\is_null($expiration)) {
 			$this->expiration = new \DateTimeImmutable('now +1 year');
 			return;
@@ -64,14 +59,9 @@ class TransientExpiration implements ExpirationInterface {
 		));
 	}
 
-	/**
-	 * @param int|\DateInterval|null $time
-	 * @return void
-	 */
 	public function expiresAfter($time): void {
-		$this->expirationValue = $time;
 		if (\is_null($time)) {
-			$this->expiration = new \DateTime('now +1 year');
+			$this->expiration = new \DateTimeImmutable('now +1 year');
 			return;
 		}
 
@@ -81,12 +71,13 @@ class TransientExpiration implements ExpirationInterface {
 		}
 
 		if (\is_int($time)) {
-			$this->expiration = new \DateTime('now +' . $time . ' seconds');
+			$this->expiration = new \DateTimeImmutable('now +' . $time . ' seconds');
 			return;
 		}
 
+		/** @psalm-suppress RedundantConditionGivenDocblockType */
 		if ($time instanceof \DateInterval) {
-			$this->expiration = (new \DateTime())->add($time);
+			$this->expiration = (new \DateTimeImmutable())->add($time);
 			return;
 		}
 
@@ -97,6 +88,6 @@ class TransientExpiration implements ExpirationInterface {
 	}
 
 	public function expirationInSeconds(): int {
-		return $this->expiration ? $this->expiration->getTimestamp() - \time() : 31_536_000;
+		return $this->expiration ? $this->expiration->getTimestamp() - $this->clock->now()->getTimestamp() : 31_536_000;
 	}
 }

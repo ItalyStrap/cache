@@ -9,7 +9,7 @@ use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
 
 class SimpleCache implements PsrSimpleCacheInterface {
 
-	use ToArrayTrait, KeyValidatorTrait;
+	use KeyValidatorTrait;
 
 	private CacheInterface $storage;
 	private array $used_keys = [];
@@ -141,8 +141,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		return $this->used_keys;
 	}
 
-	private function addValueType(string $key, $value): void
-	{
+	private function addValueType(string $key, $value): void {
 		$this->type[$key] = \gettype($value);
 	}
 }

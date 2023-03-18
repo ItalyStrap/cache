@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Cache;
 
-trait KeyValidatorTrait
-{
+trait KeyValidatorTrait {
+
 	use \Fig\Cache\KeyValidatorTrait {
 		validateKey as validateKeyTrait;
 	}

@@ -21,6 +21,7 @@
                 <referencedFunction name="get_transient"/>
                 <referencedFunction name="set_transient"/>
                 <referencedFunction name="delete_transient"/>
+                <referencedFunction name="get_option"/>
             </errorLevel>
         </UndefinedFunction>
     </issueHandlers>
