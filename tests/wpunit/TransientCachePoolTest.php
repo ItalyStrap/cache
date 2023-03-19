@@ -36,7 +36,8 @@ class TransientCachePoolTest extends WPTestCase {
 //		'testDeferredExpired' => 'Void adapter does not save items.',
 //		'testDeleteDeferredItem' => 'Void adapter does not save items.',
 
-//		'testDeferredSaveWithoutCommit' => 'A deferred item should automatically be committed on CachePool::__destruct().',
+//		'testDeferredSaveWithoutCommit' =>
+//			'A deferred item should automatically be committed on CachePool::__destruct().',
 
 //		'testCommit' => 'Void adapter does not save items.',
 //		'testExpiration' => 'Void adapter does not save items.',

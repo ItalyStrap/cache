@@ -1,5 +1,5 @@
 <?php
-
+// phpcs:ignoreFile
 /*
  * This file is part of php-cache organization.
  *

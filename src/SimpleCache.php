@@ -52,6 +52,10 @@ class SimpleCache implements PsrSimpleCacheInterface {
 			return (bool)$value;
 		}
 
+		if ($value === 0) {
+			return 0;
+		}
+
 		return $value ?: $default;
 	}
 
