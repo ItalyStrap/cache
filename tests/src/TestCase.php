@@ -58,7 +58,7 @@ class TestCase extends Unit {
 		$this->store = [];
 		$this->set_transient_return = true;
 		$this->delete_transient_return = true;
-//		$this->prophet->checkPredictions();
+		$this->prophet->checkPredictions();
 	}
 
 	protected function defineFunction(string $func_name, callable $callable): void {

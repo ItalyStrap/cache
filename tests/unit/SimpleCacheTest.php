@@ -182,7 +182,7 @@ class SimpleCacheTest extends TestCase {
 	public function itShouldSetValue($value) {
 
 		$this->storage
-			->set('key', $value, 0)
+			->set('key', $value, Argument::type('int'))
 			->willReturn(true);
 
 		$this->storage
@@ -190,7 +190,7 @@ class SimpleCacheTest extends TestCase {
 			->willReturn($value);
 
 		$sut = $this->makeInstance();
-		$sut->set('key', $value);
+		$this->assertTrue($sut->set('key', $value), '');
 		$this->assertSame($value, $sut->get('key'), '');
 	}
 
