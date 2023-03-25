@@ -29,7 +29,7 @@ class InMemoryExpiration implements ExpirationInterface {
 	public function withKey(string $key): void {
 	}
 
-	public function isValid(string $key): bool {
+	public function isValid(): bool {
 		// If the expiration time is 0 Transient consider it like a no expiration at all.
 		if ($this->expirationTime === 0) {
 			return true;

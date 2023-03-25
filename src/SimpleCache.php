@@ -15,13 +15,13 @@ class SimpleCache implements PsrSimpleCacheInterface {
 
 	use KeyValidatorTrait;
 
-	private CacheInterface $storage;
+	private CacheInterface $driver;
 	private array $used_keys = [];
 	private array $type = [];
 	private ExpirationInterface $expiration;
 
-	public function __construct(CacheInterface $storage, ExpirationInterface $expiration) {
-		$this->storage = $storage;
+	public function __construct(CacheInterface $driver, ExpirationInterface $expiration) {
+		$this->driver = $driver;
 		$this->expiration = $expiration;
 	}
 
@@ -47,7 +47,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		 * With this you simply call SimpleCache::has('some-key');
 		 * @var mixed $value
 		 */
-		$value = $this->storage->get( (string)$key );
+		$value = $this->driver->get( (string)$key );
 		if (\array_key_exists((string)$key, $this->type) && $this->type[(string)$key] === 'boolean') {
 			return (bool)$value;
 		}
@@ -76,7 +76,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
 		}
 
-		return $this->storage->set(
+		return $this->driver->set(
 			(string)$key,
 			\is_object($value) ? clone $value : $value,
 			$this->expiration->expirationInSeconds()
@@ -91,7 +91,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		}
 
 		$this->deleteUsedKey( $key );
-		return $this->storage->delete( $key );
+		return $this->driver->delete( $key );
 	}
 
 	/**

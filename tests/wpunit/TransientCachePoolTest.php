@@ -102,6 +102,20 @@ class TransientCachePoolTest extends WPTestCase {
 		$this->assertFalse(\get_transient($this->cache_key), '');
 	}
 
+	public function testVerifyValueIsInTransient() {
+		$data = 'Some data';
+		$key = 'key';
+
+		\set_transient($key, $data, -10);
+
+		$sut = $this->makeInstance();
+		$item = $sut->getItem($key);
+		if ( null === ( $value = $item->get() ) ) {
+		}
+
+		$this->assertSame($value, null, 'Value should be expired');
+	}
+
 	public function testBasicUsageWithLongKey() {
 		$this->expectException(\InvalidArgumentException::class);
 		$this->basicUsageWithLongKeyTrait();

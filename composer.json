@@ -91,6 +91,9 @@
         "wpunit": [
             "@php ./vendor/bin/codecept run wpunit"
         ],
+        "wpunit:coverage": [
+            "@php ./vendor/bin/codecept run wpunit --coverage-text"
+        ],
         "wpunit:debug": [
             "@wpunit --debug"
         ],

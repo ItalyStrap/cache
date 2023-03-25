@@ -21,16 +21,16 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 	/** @var array<string, CacheItemInterface> $deferred */
 	protected $deferred = [];
-	private CacheInterface $storage;
+	private CacheInterface $driver;
 	private ExpirationInterface $expiration;
 
 	/**
-	 * @param CacheInterface $storage
+	 * @param CacheInterface $driver
 	 * @param ExpirationInterface $expiration
 	 * @psalm-suppress PossiblyUnusedMethod
 	 */
-	public function __construct(CacheInterface $storage, ExpirationInterface $expiration) {
-		$this->storage = $storage;
+	public function __construct(CacheInterface $driver, ExpirationInterface $expiration) {
+		$this->driver = $driver;
 		$this->expiration = $expiration;
 	}
 
@@ -41,16 +41,17 @@ class CacheItemPool implements CacheItemPoolInterface {
 	public function getItem($key): CacheItemInterface {
 		$this->validateKey($key);
 		/** @psalm-suppress RedundantCastGivenDocblockType */
-		if ($this->hasDeferredItem((string)$key)) {
+		if ($this->assertItemExists((string)$key, $this->deferred)) {
 			return clone $this->deferred[$key];
 		}
 
-		if (\array_key_exists($key, $this->saved) && $this->saved[$key]->isHit()) {
+		/** @psalm-suppress RedundantCastGivenDocblockType */
+		if ($this->assertItemExists((string)$key, $this->saved)) {
 			return clone $this->saved[$key];
 		}
 
 		/** @psalm-suppress RedundantCastGivenDocblockType */
-		return new CacheItem((string)$key, $this->storage, $this->expiration);
+		return new CacheItem((string)$key, $this->driver, $this->expiration);
 	}
 
 	public function getItems(array $keys = []): iterable {
@@ -64,11 +65,8 @@ class CacheItemPool implements CacheItemPoolInterface {
 
 		// check deferred items first
 		/** @psalm-suppress RedundantCastGivenDocblockType */
-		if ($this->hasDeferredItem((string)$key)) {
-			return true;
-		}
-
-		return \array_key_exists($key, $this->saved) && $this->saved[$key]->isHit();
+		return $this->assertItemExists((string)$key, $this->deferred)
+			|| $this->assertItemExists((string)$key, $this->saved);
 	}
 
 	public function saveDeferred(CacheItemInterface $item): bool {
@@ -90,7 +88,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 		/** @var mixed $item */
 		foreach ($items as $item) {
 			$this->validateKey($item);
-			if ($this->hasDeferredItem((string)$item)) {
+			if (\array_key_exists((string)$item, $this->deferred)) {
 				unset($this->deferred[(string)$item]);
 				continue;
 			}
@@ -100,7 +98,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 				continue;
 			}
 
-			$has_value = $this->storage->delete((string)$item);
+			$has_value = $this->driver->delete((string)$item);
 
 			if ($has_value) {
 				unset($this->saved[(string)$item]);
@@ -124,22 +122,23 @@ class CacheItemPool implements CacheItemPoolInterface {
 	}
 
 	protected function write(array $items): bool {
+		$has_value = true;
 		foreach ($items as $item) {
-			$key = $item->getKey();
-			$this->expiration->withKey($key);
-			$ttl = $this->expiration->expirationInSeconds();
-			// @todo May add \InvalidArgumentException
-			$has_value = $this->storage->set($key, $item->get(), $ttl);
-
-			if ($has_value) {
-				$this->saved[$key] = $item;
+			/** @psalm-suppress InvalidFunctionCall */
+			if ($has_value = (bool)$item()) {
+				$this->saved[$item->getKey()] = $item;
 			}
 		}
 
-		return true;
+		return $has_value;
 	}
 
-	private function hasDeferredItem(string $key): bool {
-		return \array_key_exists($key, $this->deferred) && $this->deferred[$key]->isHit();
+	/**
+	 * @param string $key
+	 * @param CacheItemInterface[] $property
+	 * @return bool
+	 */
+	private function assertItemExists(string $key, array $property): bool {
+		return \array_key_exists($key, $property) && $property[$key]->isHit();
 	}
 }

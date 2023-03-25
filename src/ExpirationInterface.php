@@ -5,9 +5,11 @@ namespace ItalyStrap\Cache;
 
 interface ExpirationInterface {
 
+	public const YEAR_IN_SECONDS = 31_622_400;
+
 	public function withKey(string $key): void;
 
-	public function isValid(string $key): bool;
+	public function isValid(): bool;
 
 	/**
 	 * @param \DateTimeInterface|null $expiration

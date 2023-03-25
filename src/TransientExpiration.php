@@ -11,9 +11,6 @@ use Psr\Clock\ClockInterface;
  */
 class TransientExpiration implements ExpirationInterface {
 
-	public const TRANSIENT_TIMEOUT_KEY = '_transient_timeout_';
-	public const YEAR_IN_SECONDS = 31_536_000;
-
 	private ClockInterface $clock;
 	private ?\DateTimeInterface $expiration;
 
@@ -30,13 +27,8 @@ class TransientExpiration implements ExpirationInterface {
 	public function withKey(string $key): void {
 	}
 
-	public function isValid(string $key): bool {
-		if ($this->expirationInSeconds() > 0) {
-			return true;
-		}
-
-		$timeout = (int)\get_option(self::TRANSIENT_TIMEOUT_KEY . $key);
-		return $timeout > $this->clock->now()->getTimestamp();
+	public function isValid(): bool {
+		return $this->expirationInSeconds() > 0;
 	}
 
 	/**

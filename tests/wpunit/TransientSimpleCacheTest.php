@@ -11,7 +11,7 @@ use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\SimpleCacheTestTrait;
 use ItalyStrap\Tests\WPTestCase;
 
-class SimpleCacheTest extends WPTestCase {
+class TransientSimpleCacheTest extends WPTestCase {
 
 	use CommonTrait, SimpleCacheTestTrait;
 
@@ -99,7 +99,7 @@ class SimpleCacheTest extends WPTestCase {
 	 */
 	public function getValueFromNotPrevSetTransient() {
 		$sut = $this->makeInstance();
-		$this->assertSame(null, $sut->get('some-not-stored-key'), 'Should return null is a value is not set');
+		$this->assertSame(null, $sut->get('some-not-stored-key'), 'Should return null if a value is not set');
 	}
 
 	/**
@@ -111,8 +111,7 @@ class SimpleCacheTest extends WPTestCase {
 		$this->assertFalse(\get_transient('key'), '');
 		$this->assertNull($this->makeInstance()->get('key'), '');
 	}
-	/**
-	 */
+
 	public function testImplementation() {
 		$data = '';
 		for ($i = 0; $i < 256; $i++) {

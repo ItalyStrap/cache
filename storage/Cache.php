@@ -15,7 +15,7 @@ class Cache implements CacheInterface {
 	}
 
 	public function set(string $key, $value, $ttl = 0): bool {
-		return (bool)\wp_cache_set(...\func_get_args());
+		return (bool)\wp_cache_set($key, $value, 'default', $ttl);
 	}
 
 	public function update(string $key, $value, $ttl = 0): bool {
