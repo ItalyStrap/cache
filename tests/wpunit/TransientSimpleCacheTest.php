@@ -62,7 +62,7 @@ class TransientSimpleCacheTest extends WPTestCase {
 	];
 
 	private function makeInstance(): SimpleCache {
-		$sut = new SimpleCache(new BinaryTransient(new Transient()), new TransientExpiration());
+		$sut = new SimpleCache(new BinaryTransient(new Transient()));
 		return $sut;
 	}
 

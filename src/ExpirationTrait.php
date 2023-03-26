@@ -3,20 +3,21 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Cache;
 
-use DateTimeImmutable;
+use DateTimeInterface;
 use Psr\Clock\ClockInterface;
 
-/**
- * @psalm-api
- */
-class TransientExpiration implements ExpirationInterface {
+trait ExpirationTrait {
 
 	private ClockInterface $clock;
-	private ?\DateTimeInterface $expiration;
+	private ?DateTimeInterface $expiration;
 
-	public function __construct(ClockInterface $clock = null) {
+	/**
+	 * @param ClockInterface|null $clock
+	 * @return void
+	 */
+	private function initExpiration(?ClockInterface $clock): void {
 		$this->clock = $clock ?? new class implements ClockInterface {
-			public function now(): DateTimeImmutable {
+			public function now(): \DateTimeImmutable {
 				return new \DateTimeImmutable('now');
 			}
 		};
@@ -24,21 +25,21 @@ class TransientExpiration implements ExpirationInterface {
 		$this->expiration = null;
 	}
 
-	public function isValid(): bool {
+	private function isValid(): bool {
 		return $this->expirationInSeconds() > 0;
 	}
 
 	/**
-	 * @param \DateTimeInterface|null $expiration
+	 * @param DateTimeInterface|null $expiration
 	 * @return void
 	 */
-	public function expiresAt($expiration): void {
+	private function expiresAt($expiration): void {
 		if (\is_null($expiration)) {
 			$this->expiration = new \DateTimeImmutable('now +1 year');
 			return;
 		}
 
-		if ($expiration instanceof \DateTimeInterface) {
+		if ($expiration instanceof DateTimeInterface) {
 			$this->expiration = $expiration;
 			return;
 		}
@@ -49,7 +50,7 @@ class TransientExpiration implements ExpirationInterface {
 		));
 	}
 
-	public function expiresAfter($time): void {
+	private function expiresAfter($time): void {
 		if (\is_null($time)) {
 			$this->expiration = new \DateTimeImmutable('now +1 year');
 			return;
@@ -77,7 +78,7 @@ class TransientExpiration implements ExpirationInterface {
 		));
 	}
 
-	public function expirationInSeconds(): int {
+	private function expirationInSeconds(): int {
 		return $this->expiration ? $this->expiration->getTimestamp() - $this->clock->now()->getTimestamp() : 31_536_000;
 	}
 }

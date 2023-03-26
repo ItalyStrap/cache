@@ -8,7 +8,9 @@
 ![PHP from Packagist](https://img.shields.io/packagist/php-v/italystrap/cache)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FItalyStrap%2Fcache%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/ItalyStrap/cache/master)
 
-Simple PSR-16 cache implementations for WordPress transient the OOP way
+PSR-16 & PSR-6 Cache implementations for WordPress transient and cache the OOP way
+
+### This is a BC breaks please read the following
 
 ## Table Of Contents
 
@@ -40,6 +42,34 @@ const DAY_IN_SECONDS     = 24 * HOUR_IN_SECONDS;
 const WEEK_IN_SECONDS    = 7 * DAY_IN_SECONDS;
 const MONTH_IN_SECONDS   = 30 * DAY_IN_SECONDS;
 const YEAR_IN_SECONDS    = 365 * DAY_IN_SECONDS;
+```
+
+### Common usage with WordPress Transients API
+
+```php
+if ( false === ( $special_data_to_save = \get_transient( 'special_data_to_save' ) ) ) {
+    // It wasn't there, so regenerate the data and save the transient
+    $special_data_to_save = ['some-key' => 'come value'];
+    \set_transient( 'special_data_to_save', $special_data_to_save, 12 * HOUR_IN_SECONDS );
+}
+```
+
+### Common usage with CacheItemPool
+
+```php
+use ItalyStrap\Cache\CacheItemPool;
+
+$pool = new CacheItemPool();
+$item = $pool->getItem( 'special_data_to_save' );
+if ( ! $item->isHit() ) {
+    // It wasn't there, so regenerate the data and save the transient
+    $item->set( ['some-key' => 'come value'] );
+    $item->expiresAfter( 12 * HOUR_IN_SECONDS );
+    $pool->save( $item );
+}
+$special_data_to_save = $item->get();
+
+'special_data_to_save' === $special_data_to_save; // True
 ```
 
 ### Saving cache

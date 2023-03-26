@@ -5,6 +5,7 @@ namespace ItalyStrap\Cache;
 
 use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
 use ItalyStrap\Storage\CacheInterface;
+use Psr\Clock\ClockInterface;
 use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -13,16 +14,15 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class SimpleCache implements PsrSimpleCacheInterface {
 
-	use KeyValidatorTrait;
+	use KeyValidatorTrait, ExpirationTrait;
 
 	private CacheInterface $driver;
 	private array $used_keys = [];
 	private array $type = [];
-	private ExpirationInterface $expiration;
 
-	public function __construct(CacheInterface $driver, ExpirationInterface $expiration) {
+	public function __construct(CacheInterface $driver, ClockInterface $clock = null) {
 		$this->driver = $driver;
-		$this->expiration = $expiration;
+		$this->initExpiration($clock);
 	}
 
 	public function has( $key ): bool {
@@ -71,7 +71,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		$this->addValueType( (string)$key, $value );
 
 		try {
-			$this->expiration->expiresAfter($ttl);
+			$this->expiresAfter($ttl);
 		} catch (\InvalidArgumentException $e) {
 			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
 		}
@@ -79,7 +79,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		return $this->driver->set(
 			(string)$key,
 			\is_object($value) ? clone $value : $value,
-			$this->expiration->expirationInSeconds()
+			$this->expirationInSeconds()
 		);
 	}
 

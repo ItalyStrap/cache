@@ -23,7 +23,6 @@ class CacheItem implements CacheItemInterface {
 		$this->driver = $driver;
 		$this->value = $driver->get($key);
 		$this->isHit = (bool)$this->value;
-		$expiration->withKey($key);
 		$this->expiration = $expiration;
 	}
 

@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Storage;
 
-//* @see \wp_cache_add()
-//* @see \wp_cache_get()
-//* @see \wp_cache_set()
-//* @see \wp_cache_delete()
-//* @see \wp_cache_flush()
+/**
+ * @see \wp_cache_add()
+ * @see \wp_cache_get()
+ * @see \wp_cache_set()
+ * @see \wp_cache_delete()
+ * @see \wp_cache_flush()
+ */
 class Cache implements CacheInterface {
 
 	public function get(string $key, $default = null) {

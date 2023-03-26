@@ -7,8 +7,6 @@ interface ExpirationInterface {
 
 	public const YEAR_IN_SECONDS = 31_622_400;
 
-	public function withKey(string $key): void;
-
 	public function isValid(): bool;
 
 	/**
