@@ -28,6 +28,7 @@ trait ExpirationTrait {
 	/**
 	 * @param DateTimeInterface|null $expiration
 	 * @return void
+	 * @psalm-suppress UnusedMethod
 	 */
 	private function validateExpiration($expiration): void {
 		if (\is_null($expiration)) {
@@ -46,6 +47,16 @@ trait ExpirationTrait {
 		));
 	}
 
+	/**
+	 * @param int|\DateInterval|null $time
+	 *   The period of time from the present after which the item MUST be considered
+	 *   expired. An integer parameter is understood to be the time in seconds until
+	 *   expiration. If null is passed explicitly, a default value MAY be used.
+	 *   If none is set, the value should be stored permanently or for as long as the
+	 *   implementation allows.
+	 * @return void
+	 * @throws \Exception
+	 */
 	private function validateTime($time): void {
 		if (\is_null($time)) {
 			$this->dateTime = new \DateTimeImmutable('now +1 year');
@@ -72,10 +83,6 @@ trait ExpirationTrait {
 			'$time must be null, integer or an instance of DateInterval, got %s',
 			\gettype($time)
 		));
-	}
-
-	private function isValid(): bool {
-		return $this->expirationInSeconds() > 0;
 	}
 
 	private function expirationInSeconds(): int {
