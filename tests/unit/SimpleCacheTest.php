@@ -16,7 +16,7 @@ class SimpleCacheTest extends TestCase {
 	use CommonTrait;
 
 	public function makeInstance(): SimpleCache {
-		$sut = new SimpleCache($this->makeStorage());
+		$sut = new SimpleCache($this->makeCache());
 		$this->assertInstanceOf( CacheInterface::class, $sut, '' );
 		return $sut;
 	}
@@ -92,7 +92,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldGetTransientValue() {
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn('value');
 
@@ -106,7 +106,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldGetZeroAsValue() {
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn(0);
 
@@ -120,7 +120,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldGetOneAsValue() {
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn(1);
 
@@ -143,7 +143,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldGetCustomDefaultValue() {
 
-		$this->storage
+		$this->cache
 			->get('not-a-value-stored')
 			->willReturn('default-value');
 
@@ -181,11 +181,11 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldSetValue($value) {
 
-		$this->storage
+		$this->cache
 			->set('key', $value, Argument::type('int'))
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn($value);
 
@@ -201,11 +201,11 @@ class SimpleCacheTest extends TestCase {
 
 		$date_interval = new \DateInterval('PT2S');
 
-		$this->storage
+		$this->cache
 			->set('key', 'value', Argument::type('int'))
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn('value');
 
@@ -219,7 +219,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function setCouldReturnFalse() {
 
-		$this->storage
+		$this->cache
 			->set('key', 'value', Argument::type('int'))
 			->willReturn(false);
 
@@ -233,11 +233,11 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldHasValue() {
 
-		$this->storage
+		$this->cache
 			->set('key', 'some-value', Argument::type('int'))
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->get( 'key' )
 			->willReturn(true);
 
@@ -251,7 +251,7 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldNotHasValue() {
 
-		$this->storage
+		$this->cache
 			->get( 'key' )
 			->willReturn(false);
 
@@ -264,11 +264,11 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldDeleteValue() {
 
-		$this->storage
+		$this->cache
 			->delete('key')
 			->shouldBeCalledOnce();
 
-		$this->storage
+		$this->cache
 			->set('key', 'value')
 			->shouldBeCalledOnce()
 			->willReturn(true);
@@ -401,11 +401,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn('some-other-value');
 
-		$this->storage
+		$this->cache
 			->get('key2')
 			->willReturn('value 2');
 
@@ -423,11 +423,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn('some-other-value');
 
-		$this->storage
+		$this->cache
 			->get('key2')
 			->willReturn('value 2');
 
@@ -445,11 +445,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn('some-other-value');
 
-		$this->storage
+		$this->cache
 			->get('key2')
 			->willReturn('value 2');
 
@@ -467,11 +467,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> false,
 		];
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn('some-other-value');
 
-		$this->storage
+		$this->cache
 			->get('key2')
 			->willReturn('default');
 
@@ -489,11 +489,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->set('key', 'some-other-value', 0)
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->set('key2', 'value 2', 0)
 			->willReturn(true);
 
@@ -511,11 +511,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->set('key', 'some-other-value', 0)
 			->willReturn(false);
 
-		$this->storage
+		$this->cache
 			->set('key2', 'value 2', 0)
 			->willReturn(false);
 
@@ -533,19 +533,19 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->set('key', 'some-other-value', 0)
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->set('key2', 'value 2', 0)
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->get('key')
 			->willReturn('some-other-value');
 
-		$this->storage
+		$this->cache
 			->get('key2')
 			->willReturn('value 2');
 
@@ -565,11 +565,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->set('key', 'some-other-value', 0)
 			->willReturn(false);
 
-		$this->storage
+		$this->cache
 			->set('key2', 'value 2', 0)
 			->willReturn(false);
 
@@ -587,11 +587,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->delete( 'key' )
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->delete( 'key2' )
 			->willReturn(true);
 
@@ -610,11 +610,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->delete( 'key' )
 			->willReturn(false);
 
-		$this->storage
+		$this->cache
 			->delete( 'key2' )
 			->willReturn(false);
 
@@ -632,11 +632,11 @@ class SimpleCacheTest extends TestCase {
 			'key2'	=> 'value 2',
 		];
 
-		$this->storage
+		$this->cache
 			->delete( 'key' )
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->delete( 'key2' )
 			->willReturn(true);
 
@@ -650,19 +650,19 @@ class SimpleCacheTest extends TestCase {
 	 */
 	public function itShouldClearCache() {
 
-		$this->storage
+		$this->cache
 			->set('key', 'some-other-value', 0)
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->set('key2', 'value 2', 0)
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->delete( 'key' )
 			->willReturn(true);
 
-		$this->storage
+		$this->cache
 			->delete( 'key2' )
 			->willReturn(true);
 
@@ -682,7 +682,7 @@ class SimpleCacheTest extends TestCase {
 	public function itShouldBeTenSecondTTL() {
 		$date = new \DateInterval('PT10S');
 
-		$this->storage
+		$this->cache
 			->set('key', 'value', 10)
 			->willReturn(true);
 
