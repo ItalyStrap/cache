@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests\WPUnit;
 
 use ItalyStrap\Cache\SimpleCache;
-use ItalyStrap\Cache\TransientExpiration;
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CommonTrait;

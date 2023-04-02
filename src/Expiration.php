@@ -9,10 +9,10 @@ use Psr\Clock\ClockInterface;
 /**
  * @psalm-api
  */
-class TransientExpiration implements ExpirationInterface {
+class Expiration implements ExpirationInterface {
 
 	private ClockInterface $clock;
-	private ?\DateTimeInterface $expiration;
+	private ?\DateTimeInterface $dateTime;
 
 	public function __construct(ClockInterface $clock = null) {
 		$this->clock = $clock ?? new class implements ClockInterface {
@@ -21,7 +21,7 @@ class TransientExpiration implements ExpirationInterface {
 			}
 		};
 
-		$this->expiration = null;
+		$this->dateTime = null;
 	}
 
 	public function isValid(): bool {
@@ -34,12 +34,12 @@ class TransientExpiration implements ExpirationInterface {
 	 */
 	public function expiresAt($expiration): void {
 		if (\is_null($expiration)) {
-			$this->expiration = new \DateTimeImmutable('now +1 year');
+			$this->dateTime = new \DateTimeImmutable('now +1 year');
 			return;
 		}
 
 		if ($expiration instanceof \DateTimeInterface) {
-			$this->expiration = $expiration;
+			$this->dateTime = $expiration;
 			return;
 		}
 
@@ -51,7 +51,7 @@ class TransientExpiration implements ExpirationInterface {
 
 	public function expiresAfter($time): void {
 		if (\is_null($time)) {
-			$this->expiration = new \DateTimeImmutable('now +1 year');
+			$this->dateTime = new \DateTimeImmutable('now +1 year');
 			return;
 		}
 
@@ -61,13 +61,13 @@ class TransientExpiration implements ExpirationInterface {
 		}
 
 		if (\is_int($time)) {
-			$this->expiration = new \DateTimeImmutable('now +' . $time . ' seconds');
+			$this->dateTime = new \DateTimeImmutable('now +' . $time . ' seconds');
 			return;
 		}
 
 		/** @psalm-suppress RedundantConditionGivenDocblockType */
 		if ($time instanceof \DateInterval) {
-			$this->expiration = (new \DateTimeImmutable())->add($time);
+			$this->dateTime = (new \DateTimeImmutable())->add($time);
 			return;
 		}
 
@@ -78,6 +78,6 @@ class TransientExpiration implements ExpirationInterface {
 	}
 
 	public function expirationInSeconds(): int {
-		return $this->expiration ? $this->expiration->getTimestamp() - $this->clock->now()->getTimestamp() : 31_536_000;
+		return $this->dateTime ? $this->dateTime->getTimestamp() - $this->clock->now()->getTimestamp() : 31_536_000;
 	}
 }

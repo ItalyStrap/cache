@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests\WPUnit;
 
 use ItalyStrap\Cache\CacheItemPool;
-use ItalyStrap\Cache\TransientExpiration;
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CachePoolTestTrait;
@@ -69,7 +69,7 @@ class TransientCachePoolTest extends WPTestCase {
 	];
 
 	public function makeInstance(): CacheItemPoolInterface {
-		$sut = new CacheItemPool(new BinaryCacheDecorator(new Transient()), new TransientExpiration());
+		$sut = new CacheItemPool(new BinaryCacheDecorator(new Transient()), new Expiration());
 		return $sut;
 	}
 
