@@ -5,7 +5,7 @@ namespace ItalyStrap\Tests\WPUnit;
 
 use ItalyStrap\Cache\SimpleCache;
 use ItalyStrap\Cache\TransientExpiration;
-use ItalyStrap\Storage\BinaryTransient;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\SimpleCacheTestTrait;
@@ -62,7 +62,7 @@ class TransientSimpleCacheTest extends WPTestCase {
 	];
 
 	private function makeInstance(): SimpleCache {
-		$sut = new SimpleCache(new BinaryTransient(new Transient()));
+		$sut = new SimpleCache(new BinaryCacheDecorator(new Transient()));
 		return $sut;
 	}
 
@@ -120,7 +120,7 @@ class TransientSimpleCacheTest extends WPTestCase {
 
 		$key = 'key';
 		\add_filter("transient_$key", function ($value) use ($key, $data) {
-			$generated_key = \md5(BinaryTransient::class . $key);
+			$generated_key = \md5(BinaryCacheDecorator::class . $key);
 			return [$generated_key => base64_encode($data)];
 		});
 

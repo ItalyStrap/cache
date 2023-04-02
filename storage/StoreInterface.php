@@ -6,8 +6,8 @@ namespace ItalyStrap\Storage;
 /**
  * @psalm-api
  */
-interface CacheInterface
-{
+interface StoreInterface {
+
 	/**
 	 * @param string $key
 	 * @param mixed $default
@@ -18,18 +18,16 @@ interface CacheInterface
 	/**
 	 * @param string $key
 	 * @param mixed $value
-	 * @param int|null $ttl
 	 * @return bool
 	 */
-	public function set(string $key, $value, ?int $ttl = null): bool;
+	public function set(string $key, $value): bool;
 
 	/**
 	 * @param string $key
 	 * @param mixed $value
-	 * @param int|null $ttl
 	 * @return bool
 	 */
-	public function update(string $key, $value, ?int $ttl = null): bool;
+	public function update(string $key, $value): bool;
 
 	/**
 	 * @param string $key
@@ -46,10 +44,9 @@ interface CacheInterface
 
 	/**
 	 * @param iterable $values
-	 * @param int|null $ttl
 	 * @return bool
 	 */
-	public function setMultiple(iterable $values, ?int $ttl = null): bool;
+	public function setMultiple(iterable $values): bool;
 
 	/**
 	 * @param iterable $keys

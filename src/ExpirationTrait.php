@@ -9,38 +9,34 @@ use Psr\Clock\ClockInterface;
 trait ExpirationTrait {
 
 	private ClockInterface $clock;
-	private ?DateTimeInterface $expiration;
+	private ?DateTimeInterface $dateTime;
 
 	/**
 	 * @param ClockInterface|null $clock
 	 * @return void
 	 */
-	private function initExpiration(?ClockInterface $clock): void {
+	private function initClock(?ClockInterface $clock = null): void {
 		$this->clock = $clock ?? new class implements ClockInterface {
 			public function now(): \DateTimeImmutable {
 				return new \DateTimeImmutable('now');
 			}
 		};
 
-		$this->expiration = null;
-	}
-
-	private function isValid(): bool {
-		return $this->expirationInSeconds() > 0;
+		$this->dateTime = null;
 	}
 
 	/**
 	 * @param DateTimeInterface|null $expiration
 	 * @return void
 	 */
-	private function expiresAt($expiration): void {
+	private function validateExpiration($expiration): void {
 		if (\is_null($expiration)) {
-			$this->expiration = new \DateTimeImmutable('now +1 year');
+			$this->dateTime = new \DateTimeImmutable('now +1 year');
 			return;
 		}
 
 		if ($expiration instanceof DateTimeInterface) {
-			$this->expiration = $expiration;
+			$this->dateTime = $expiration;
 			return;
 		}
 
@@ -50,9 +46,9 @@ trait ExpirationTrait {
 		));
 	}
 
-	private function expiresAfter($time): void {
+	private function validateTime($time): void {
 		if (\is_null($time)) {
-			$this->expiration = new \DateTimeImmutable('now +1 year');
+			$this->dateTime = new \DateTimeImmutable('now +1 year');
 			return;
 		}
 
@@ -62,13 +58,13 @@ trait ExpirationTrait {
 		}
 
 		if (\is_int($time)) {
-			$this->expiration = new \DateTimeImmutable('now +' . $time . ' seconds');
+			$this->dateTime = new \DateTimeImmutable('now +' . $time . ' seconds');
 			return;
 		}
 
 		/** @psalm-suppress RedundantConditionGivenDocblockType */
 		if ($time instanceof \DateInterval) {
-			$this->expiration = (new \DateTimeImmutable())->add($time);
+			$this->dateTime = (new \DateTimeImmutable())->add($time);
 			return;
 		}
 
@@ -78,7 +74,11 @@ trait ExpirationTrait {
 		));
 	}
 
+	private function isValid(): bool {
+		return $this->expirationInSeconds() > 0;
+	}
+
 	private function expirationInSeconds(): int {
-		return $this->expiration ? $this->expiration->getTimestamp() - $this->clock->now()->getTimestamp() : 31_536_000;
+		return $this->dateTime ? $this->dateTime->getTimestamp() - $this->clock->now()->getTimestamp() : 31_536_000;
 	}
 }

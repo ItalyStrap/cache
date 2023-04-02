@@ -82,7 +82,7 @@
             "@php ./vendor/bin/phpbench run --report=performance"
         ],
         "psalm": [
-            "@php ./vendor/bin/psalm"
+            "@php ./vendor/bin/psalm --no-cache"
         ],
         "tests": [
             "@unit",

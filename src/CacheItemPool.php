@@ -54,7 +54,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 		return new CacheItem((string)$key, $this->driver, $this->expiration);
 	}
 
-	public function getItems(array $keys = []): iterable {
+	public function getItems(iterable $keys = []): iterable {
 		foreach ($keys as $key) {
 			yield $key => $this->getItem($key);
 		}
@@ -78,7 +78,7 @@ class CacheItemPool implements CacheItemPoolInterface {
 	 * @param array<array-key, mixed> $items
 	 * @return bool
 	 */
-	public function deleteItems(array $items): bool {
+	public function deleteItems(iterable $items): bool {
 		$has_value = false;
 
 		if (empty($items)) {

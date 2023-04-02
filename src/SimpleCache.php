@@ -5,6 +5,7 @@ namespace ItalyStrap\Cache;
 
 use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
 use ItalyStrap\Storage\CacheInterface;
+use ItalyStrap\Storage\ClearableInterface;
 use Psr\Clock\ClockInterface;
 use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -22,7 +23,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 
 	public function __construct(CacheInterface $driver, ClockInterface $clock = null) {
 		$this->driver = $driver;
-		$this->initExpiration($clock);
+		$this->initClock($clock);
 	}
 
 	public function has( $key ): bool {
@@ -71,7 +72,7 @@ class SimpleCache implements PsrSimpleCacheInterface {
 		$this->addValueType( (string)$key, $value );
 
 		try {
-			$this->expiresAfter($ttl);
+			$this->validateTime($ttl);
 		} catch (\InvalidArgumentException $e) {
 			throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
 		}
@@ -168,7 +169,12 @@ class SimpleCache implements PsrSimpleCacheInterface {
 	}
 
 	public function clear(): bool {
-		return $this->deleteMultiple( $this->usedKeys() );
+		$cleared = true;
+		if ($this->driver instanceof ClearableInterface) {
+			$cleared = $this->driver->clear();
+		}
+
+		return $cleared && $this->deleteMultiple( $this->usedKeys() );
 	}
 
 	/**

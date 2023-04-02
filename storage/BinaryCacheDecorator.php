@@ -3,21 +3,32 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Storage;
 
-class BinaryTransient implements CacheInterface {
+/**
+ * @psalm-api
+ */
+class BinaryCacheDecorator implements CacheInterface {
 
-	private CacheInterface $storage;
+	use MultipleTrait, SetCacheTrait;
 
-	public function __construct(CacheInterface $storage)
+	private CacheInterface $driver;
+
+	public function __construct(CacheInterface $driver)
 	{
-		$this->storage = $storage;
+		$this->driver = $driver;
 	}
 
+	/**
+	 * @param string $key
+	 * @param mixed $default
+	 * @return mixed
+	 */
 	public function get(string $key, $default = null) {
-		$data = $this->storage->get(...\func_get_args());
+		/** @var mixed $data */
+		$data = $this->driver->get($key, $default);
 
 		$generated_key = $this->generateKey($key);
 		if (\is_array($data) && \array_key_exists($generated_key, $data)) {
-			return $this->decode($data[$generated_key]) ?? $data;
+			return $this->decode((string)$data[$generated_key]) ?: $data;
 		}
 
 		return $data;
@@ -29,31 +40,39 @@ class BinaryTransient implements CacheInterface {
 	 * it is more simple to access later with the `BinaryTransient::get()` method.
 	 * If you have a better solution for this please go on and make a PR.
 	 */
-	public function set(string $key, $value, $ttl = 0): bool {
+	public function set(string $key, $value, ?int $ttl = 0): bool {
 		if (\is_string($value) && !mb_check_encoding($value, 'ASCII')) {
-			return $this->storage->set($key, [$this->generateKey($key) => $this->encode($value)], $ttl);
+			return $this->driver->set($key, [$this->generateKey($key) => $this->encode($value)], $ttl);
 		}
 
-		return $this->storage->set(...\func_get_args());
+		return $this->driver->set($key, $value, $ttl);
 	}
 
-	public function update(string $key, $value, $ttl = 0): bool {
+	public function update(string $key, $value, ?int $ttl = 0): bool {
 		if (\is_string($value) && !mb_check_encoding($value, 'ASCII')) {
-			return $this->storage->update($key, [$this->generateKey($key) => $this->encode($value)], $ttl);
+			return $this->driver->update($key, [$this->generateKey($key) => $this->encode($value)], $ttl);
 		}
 
-		return $this->storage->update(...\func_get_args());
+		return $this->driver->update($key, $value, $ttl);
 	}
 
 	public function delete(string $key): bool {
-		return $this->storage->delete(...\func_get_args());
+		return $this->driver->delete($key);
 	}
 
+	/**
+	 * @param string $value
+	 * @return string
+	 */
 	private function encode(string $value): string
 	{
 		return \base64_encode($value);
 	}
 
+	/**
+	 * @param string $value
+	 * @return false|string
+	 */
 	private function decode(string $value)
 	{
 		return \base64_decode($value, true);

@@ -11,6 +11,7 @@
 >
     <projectFiles>
         <directory name="src" />
+        <directory name="storage" />
         <ignoreFiles>
             <directory name="vendor" />
         </ignoreFiles>
@@ -22,6 +23,19 @@
                 <referencedFunction name="set_transient"/>
                 <referencedFunction name="delete_transient"/>
                 <referencedFunction name="get_option"/>
+                <referencedFunction name="add_option"/>
+                <referencedFunction name="update_option"/>
+                <referencedFunction name="delete_option"/>
+                <referencedFunction name="wp_cache_get"/>
+                <referencedFunction name="wp_cache_set"/>
+                <referencedFunction name="wp_cache_replace"/>
+                <referencedFunction name="wp_cache_delete"/>
+                <referencedFunction name="wp_cache_incr"/>
+                <referencedFunction name="wp_cache_decr"/>
+                <referencedFunction name="wp_cache_flush"/>
+                <referencedFunction name="wp_cache_set_multiple"/>
+                <referencedFunction name="wp_cache_get_multiple"/>
+                <referencedFunction name="wp_cache_delete_multiple"/>
             </errorLevel>
         </UndefinedFunction>
     </issueHandlers>
