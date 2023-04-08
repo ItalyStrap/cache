@@ -9,10 +9,10 @@ namespace ItalyStrap\Storage;
  */
 interface ClearableInterface
 {
-	/**
-	 * Removes all cache items.
-	 *
-	 * @return bool True on success, false on failure.
-	 */
-	public function clear(): bool;
+    /**
+     * Removes all cache items.
+     *
+     * @return bool True on success, false on failure.
+     */
+    public function clear(): bool;
 }

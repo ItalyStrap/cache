@@ -8,5 +8,6 @@ use Psr\SimpleCache\InvalidArgumentException as PsrInvalidArgumentException;
 
 use function sprintf;
 
-class SimpleCacheInvalidArgumentException extends InvalidArgumentException implements PsrInvalidArgumentException {
+class SimpleCacheInvalidArgumentException extends InvalidArgumentException implements PsrInvalidArgumentException
+{
 }

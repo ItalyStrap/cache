@@ -7,62 +7,65 @@ use Codeception\Test\Unit;
 use ItalyStrap\Storage\CacheInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
 
-class TestCase extends Unit {
+class TestCase extends Unit
+{
 
-	use ProphecyTrait;
+    use ProphecyTrait;
 
-	/**
-	 * @var \UnitTester
-	 */
-	protected $tester;
+    /**
+     * @var \UnitTester
+     */
+    protected $tester;
 
-	protected $store = [];
-	protected $set_transient_return = true;
-	protected $delete_transient_return = true;
-	protected $ttl = 0;
+    protected $store = [];
+    protected $set_transient_return = true;
+    protected $delete_transient_return = true;
+    protected $ttl = 0;
 
-	protected \Prophecy\Prophecy\ObjectProphecy $cache;
+    protected \Prophecy\Prophecy\ObjectProphecy $cache;
 
-	public function makeCache(): CacheInterface {
-		return $this->cache->reveal();
-	}
+    public function makeCache(): CacheInterface
+    {
+        return $this->cache->reveal();
+    }
 
 	// phpcs:ignore
 	protected function _before() {
 
-		$this->cache = $this->prophesize(CacheInterface::class);
+        $this->cache = $this->prophesize(CacheInterface::class);
 
-		$this->defineFunction('get_transient', function ( string $key ) {
-			return $this->store[ $key ] ?? false;
-		});
+        $this->defineFunction('get_transient', function (string $key) {
+            return $this->store[ $key ] ?? false;
+        });
 
-		$this->defineFunction('set_transient', function ( string $key, $value, $ttl = 0 ) {
-			$this->ttl = $ttl;
-			$this->store[ $key ] = $value;
-			return $this->set_transient_return;
-		});
+        $this->defineFunction('set_transient', function (string $key, $value, $ttl = 0) {
+            $this->ttl = $ttl;
+            $this->store[ $key ] = $value;
+            return $this->set_transient_return;
+        });
 
-		$this->defineFunction('delete_transient', function ( string $key ) {
-			unset($this->store[ $key ]);
-			return $this->delete_transient_return;
-		});
-	}
+        $this->defineFunction('delete_transient', function (string $key) {
+            unset($this->store[ $key ]);
+            return $this->delete_transient_return;
+        });
+    }
 
 	// phpcs:ignore
 	protected function _after() {
-		\tad\FunctionMockerLe\undefineAll([
-			'get_transient',
-			'set_transient',
-			'delete_transient',
-		]);
-		$this->store = [];
-		$this->set_transient_return = true;
-		$this->delete_transient_return = true;
-		$this->prophet->checkPredictions();
-	}
+        \tad\FunctionMockerLe\undefineAll([
+            'get_transient',
+            'set_transient',
+            'delete_transient',
+        ]);
+        $this->store = [];
+        $this->set_transient_return = true;
+        $this->delete_transient_return = true;
+        $this->prophet->checkPredictions();
+    }
 
-	protected function defineFunction(string $func_name, callable $callable): void {
+    protected function defineFunction(string $func_name, callable $callable): void
+    {
 		// phpcs:ignore
 		\tad\FunctionMockerLe\define($func_name, $callable);
-	}
+    }
 }

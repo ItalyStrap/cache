@@ -1,7 +1,7 @@
 {
     "name": "italystrap/cache",
     "description": "Simple PSR-16 cache implementations for WordPress transient the OOP way",
-    "keywords": ["psr", "psr-16", "cache", "WordPress", "transient", "transients"],
+    "keywords": ["psr", "psr-16", "psr-6", "cache", "WordPress", "transient", "transients"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -107,10 +107,10 @@
             "@unit --debug"
         ],
         "cs": [
-            "@php vendor/bin/phpcs -p --ignore=./tests/_support/* ./src/ ./tests/"
+            "@php vendor/bin/phpcs -p"
         ],
         "cs:fix": [
-            "@php vendor/bin/phpcbf -p --ignore=./tests/_support/* ./src/ ./tests/"
+            "@php vendor/bin/phpcbf -p"
         ],
         "qa": [
             "@compat",
@@ -121,8 +121,8 @@
         ]
     },
     "support"    : {
-        "issues": "https://github.com/ItalyStrap/cleaner/issues",
-        "source": "https://github.com/ItalyStrap/cleaner"
+        "issues": "https://github.com/ItalyStrap/common/issues",
+        "source": "https://github.com/ItalyStrap/common"
     },
     "config": {
         "allow-plugins": {
