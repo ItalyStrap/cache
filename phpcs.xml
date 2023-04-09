@@ -13,7 +13,6 @@
     <config name="testVersion" value="7.4-"/>
 
     <file>./src/</file>
-    <file>./storage/</file>
     <file>./tests/</file>
 
     <!-- https://gist.github.com/gsherwood/9d22f634c57f990a7c64 -->
