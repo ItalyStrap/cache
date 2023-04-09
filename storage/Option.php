@@ -12,7 +12,7 @@ namespace ItalyStrap\Storage;
  */
 class Option implements StoreInterface
 {
-    use MultipleTrait, SetStoreTrait;
+    use MultipleTrait, SetMultipleStoreTrait;
 
     /**
      * @param string $key

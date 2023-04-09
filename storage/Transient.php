@@ -9,7 +9,7 @@ namespace ItalyStrap\Storage;
 class Transient implements CacheInterface
 {
 
-    use KeyLengthValidate, MultipleTrait, SetCacheTrait;
+    use KeyLengthValidate, MultipleTrait, SetMultipleCacheTrait;
 
     public function get(string $key, $default = null)
     {

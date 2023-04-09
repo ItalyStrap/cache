@@ -20,8 +20,8 @@ class WPTestCase extends WPUnit
         // Before...
         parent::setUp();
 
-        $this->assertTrue(\is_plugin_active('cache/index.php'), '');
-        $this->assertTrue((bool)\did_action('plugins_loaded'), '');
+        $this->assertTrue(\is_plugin_active('cache/index.php'), 'Plugin must be active, check the name');
+        $this->assertTrue((bool)\did_action('plugins_loaded'), 'Assert WordPress Event "plugins_loaded" is fired');
         $this->assertFalse((bool)\did_action('not_valid_event_name'), '');
 
         $this->cache_key = 'widget_list';

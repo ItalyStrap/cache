@@ -9,7 +9,7 @@ namespace ItalyStrap\Storage;
 class BinaryCacheDecorator implements CacheInterface
 {
 
-    use MultipleTrait, SetCacheTrait;
+    use MultipleTrait, SetMultipleCacheTrait;
 
     private CacheInterface $driver;
 
