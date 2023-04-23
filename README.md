@@ -47,10 +47,10 @@ const YEAR_IN_SECONDS    = 365 * DAY_IN_SECONDS;
 ### Common usage with WordPress Transients API
 
 ```php
-if ( false === ( $special_data_to_save = \get_transient( 'special_data_to_save' ) ) ) {
+if (false === ($special_data_to_save = \get_transient('special_data_to_save'))) {
     // It wasn't there, so regenerate the data and save the transient
     $special_data_to_save = ['some-key' => 'come value'];
-    \set_transient( 'special_data_to_save', $special_data_to_save, 12 * HOUR_IN_SECONDS );
+    \set_transient('special_data_to_save', $special_data_to_save, 12 * HOUR_IN_SECONDS);
 }
 ```
 
@@ -60,12 +60,12 @@ if ( false === ( $special_data_to_save = \get_transient( 'special_data_to_save' 
 use ItalyStrap\Cache\CacheItemPool;
 
 $pool = new CacheItemPool();
-$item = $pool->getItem( 'special_data_to_save' );
-if ( ! $item->isHit() ) {
+$item = $pool->getItem('special_data_to_save');
+if (! $item->isHit()) {
     // It wasn't there, so regenerate the data and save the transient
-    $item->set( ['some-key' => 'come value'] );
-    $item->expiresAfter( 12 * HOUR_IN_SECONDS );
-    $pool->save( $item );
+    $item->set(['some-key' => 'come value']);
+    $item->expiresAfter(12 * HOUR_IN_SECONDS);
+    $pool->save($item);
 }
 $special_data_to_save = $item->get();
 
@@ -78,7 +78,7 @@ $special_data_to_save = $item->get();
 use ItalyStrap\Cache\SimpleCache;
 
 $cache = new SimpleCache();
-$cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS ); // Return bool
+$cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS); // Return bool
 ```
 
 ### Fetching cache
@@ -87,9 +87,9 @@ $cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_
 use ItalyStrap\Cache\SimpleCache;
 
 $cache = new SimpleCache();
-$cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+$cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
 
-$fetched_value = $cache->get( 'special_data_to_save' ); // ['some-key' => 'come value']
+$fetched_value = $cache->get('special_data_to_save'); // ['some-key' => 'come value']
 ```
 
 ### Deleting cache
@@ -98,9 +98,9 @@ $fetched_value = $cache->get( 'special_data_to_save' ); // ['some-key' => 'come 
 use ItalyStrap\Cache\SimpleCache;
 
 $cache = new SimpleCache();
-$cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+$cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
 
-$cache->delete( 'special_data_to_save' ); // Return bool
+$cache->delete('special_data_to_save'); // Return bool
 ```
 
 ### Check cache exists
@@ -109,7 +109,7 @@ $cache->delete( 'special_data_to_save' ); // Return bool
 use ItalyStrap\Cache\SimpleCache;
 
 $cache = new SimpleCache();
-$cache->has( 'special_data_to_save' ); // Return bool
+$cache->has('special_data_to_save'); // Return bool
 ```
 
 ### Saving multiple cache
@@ -124,7 +124,7 @@ $values = [
     'key2'      => 'value2',
 ];
 
-$cache->setMultiple( $values, 12 * HOUR_IN_SECONDS ); // Return bool
+$cache->setMultiple($values, 12 * HOUR_IN_SECONDS); // Return bool
 ```
 
 ### Fetching multiple cache
@@ -140,7 +140,7 @@ $values = [
     'key3'      => false, // This will be replaced with 'some default value'
 ];
 
-$fetched_values = $cache->getMultiple( \array_keys($values), 'some default value' ); // Return values
+$fetched_values = $cache->getMultiple(\array_keys($values), 'some default value'); // Return values
 ```
 
 ### Deleting multiple cache
@@ -156,7 +156,7 @@ $values = [
     'key3'      => false, // This will be replaced with 'some default value'
 ];
 
-$cache->deleteMultiple( \array_keys($values) ); // Return bool
+$cache->deleteMultiple(\array_keys($values)); // Return bool
 ```
 
 ### Clearing cache
@@ -168,14 +168,14 @@ This method do not clear the entire WordPress cache, only the cache used by clie
 use ItalyStrap\Cache\SimpleCache;
 
 $cache = new SimpleCache();
-$cache->set( 'special_data_to_save',['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+$cache->set('special_data_to_save',['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
 
 $values = [
     'key'       => 'value',
     'key2'      => 'value2',
 ];
 
-$cache->setMultiple( $values, 12 * HOUR_IN_SECONDS );
+$cache->setMultiple($values, 12 * HOUR_IN_SECONDS);
 
 $cache->clear(); // Return bool
 ```
@@ -190,18 +190,18 @@ use ItalyStrap\Cache\SimpleCache;
 $cache = new SimpleCache();
 
 // Get any existing copy of our transient data
-if ( false === ( $special_data_to_save = $cache->get( 'special_data_to_save' ) ) ) {
+if (false === ($special_data_to_save = $cache->get('special_data_to_save'))) {
     // It wasn't there, so regenerate the data and save the transient
-     $cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+     $cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
 }
 // Use the data like you would have normally...
 
 //Or
 
 // Get any existing copy of our transient data
-if ( ! $cache->has( 'special_data_to_save' ) ) {
+if (!$cache->has('special_data_to_save')) {
     // It wasn't there, so regenerate the data and save the transient
-     $cache->set( 'special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS );
+     $cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
 }
 // Use the data like you would have normally...
 ```
