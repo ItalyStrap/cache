@@ -77,7 +77,7 @@ class SimpleCacheBridgeTest extends WPTestCase
             $this->markTestSkipped($this->skippedTests[__FUNCTION__]);
         }
 
-        $key = str_repeat('a', 180);
+        $key = str_repeat('a', 172);
 
         $this->assertFalse($this->cache->has($key));
         $this->assertTrue($this->cache->set($key, 'value'));

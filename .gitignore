@@ -1,10 +1,17 @@
+## Composer
 /vendor/
+*.lock
 
-/_others/
-
+## WP Bowser
 *.local
 codeception.yml
-*.lock
-infection.json.dist
 
-*.bat
+## Infection
+infection.json
+
+## Docker
+.docker/
+
+## Temp files
+tests/unit/ExpirationTest.php
+tests/wpunit/ExpirationTest.php
