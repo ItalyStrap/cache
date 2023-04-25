@@ -8,12 +8,14 @@ use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CachePoolTestTrait;
+use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\WPTestCase;
 use Psr\Cache\CacheItemPoolInterface;
 
-class TransientCachePoolTest extends WPTestCase
+class CachePoolTransientTest extends WPTestCase
 {
 
+    use CommonTrait;
     use CachePoolTestTrait {
         CachePoolTestTrait::testBasicUsageWithLongKey as basicUsageWithLongKeyTrait;
     }
@@ -73,11 +75,6 @@ class TransientCachePoolTest extends WPTestCase
     {
         $sut = new CacheItemPool(new BinaryCacheDecorator(new Transient()), new Expiration());
         return $sut;
-    }
-
-    public function createCachePool(): CacheItemPoolInterface
-    {
-        return $this->makeInstance();
     }
 
     /**

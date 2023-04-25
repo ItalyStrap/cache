@@ -5,7 +5,6 @@ namespace ItalyStrap\Tests\Unit;
 
 use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
 use ItalyStrap\Cache\SimpleCache;
-use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\TestCase;
 use Prophecy\Argument;

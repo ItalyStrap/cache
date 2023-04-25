@@ -93,7 +93,8 @@ class SimpleCache implements PsrSimpleCacheInterface
     {
         $this->assertKeyIsValid($key);
 
-        if (!\array_key_exists($key, $this->usedKeys())) {
+        if (!$this->has($key)) {
+            $this->deleteUsedKey($key);
             return true;
         }
 

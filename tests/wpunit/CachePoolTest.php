@@ -7,13 +7,14 @@ use ItalyStrap\Cache\CacheItemPool;
 use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Storage\Cache;
 use ItalyStrap\Tests\CachePoolTestTrait;
+use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\WPTestCase;
 use Psr\Cache\CacheItemPoolInterface;
 
 class CachePoolTest extends WPTestCase
 {
 
-    use CachePoolTestTrait;
+    use CommonTrait, CachePoolTestTrait;
 
     private array $skippedTests = [
 //      'testBasicUsageWithLongKey' => 'Max length accepted for the key is 180 chars.',
@@ -69,11 +70,6 @@ class CachePoolTest extends WPTestCase
     public function makeInstance(): CacheItemPoolInterface
     {
         return new CacheItemPool(new Cache(), new Expiration());
-    }
-
-    public function createCachePool(): CacheItemPoolInterface
-    {
-        return $this->makeInstance();
     }
 
     /**

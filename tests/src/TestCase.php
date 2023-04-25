@@ -6,6 +6,8 @@ namespace ItalyStrap\Tests;
 use Codeception\Test\Unit;
 use ItalyStrap\Storage\CacheInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
+use function tad\FunctionMockerLe\defineWithMap;
+use function tad\FunctionMockerLe\undefineAll;
 
 class TestCase extends Unit
 {
@@ -17,10 +19,15 @@ class TestCase extends Unit
      */
     protected $tester;
 
-    protected $store = [];
-    protected $set_transient_return = true;
-    protected $delete_transient_return = true;
-    protected $ttl = 0;
+    protected array $store = [];
+    protected bool $set_return_value = true;
+    protected bool $delete_return_value = true;
+    protected ?int $ttl = 0;
+
+    /**
+     * @var \Closure[]
+     */
+    private array $mockFunctionDefinitions;
 
     protected \Prophecy\Prophecy\ObjectProphecy $cache;
 
@@ -31,35 +38,41 @@ class TestCase extends Unit
 
 	// phpcs:ignore
 	protected function _before() {
+        $this->mockFunctionDefinitions = [
+            'get_transient' => function (string $key) {
+                if ($this->ttl && $this->ttl < 0) {
+                    return false;
+                }
+
+                return $this->store[ $key ] ?? false;
+            },
+            'set_transient' => function (string $key, $value, $ttl = 0): bool {
+                $this->ttl = $ttl;
+                $this->store[ $key ] = $value;
+                return $this->set_return_value;
+            },
+            'delete_transient' => function (string $key): bool {
+                if (!\array_key_exists($key, $this->store)) {
+                    return false;
+                }
+
+                unset($this->store[ $key ]);
+                return $this->delete_return_value;
+            },
+        ];
+
+        defineWithMap($this->mockFunctionDefinitions);
 
         $this->cache = $this->prophesize(CacheInterface::class);
-
-        $this->defineFunction('get_transient', function (string $key) {
-            return $this->store[ $key ] ?? false;
-        });
-
-        $this->defineFunction('set_transient', function (string $key, $value, $ttl = 0) {
-            $this->ttl = $ttl;
-            $this->store[ $key ] = $value;
-            return $this->set_transient_return;
-        });
-
-        $this->defineFunction('delete_transient', function (string $key) {
-            unset($this->store[ $key ]);
-            return $this->delete_transient_return;
-        });
     }
 
 	// phpcs:ignore
 	protected function _after() {
-        \tad\FunctionMockerLe\undefineAll([
-            'get_transient',
-            'set_transient',
-            'delete_transient',
-        ]);
+        undefineAll(\array_keys($this->mockFunctionDefinitions));
         $this->store = [];
-        $this->set_transient_return = true;
-        $this->delete_transient_return = true;
+        $this->set_return_value = true;
+        $this->delete_return_value = true;
+        $this->ttl = 0;
         $this->prophet->checkPredictions();
     }
 

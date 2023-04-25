@@ -11,7 +11,7 @@ use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\SimpleCacheTestTrait;
 use ItalyStrap\Tests\WPTestCase;
 
-class TransientSimpleCacheTest extends WPTestCase
+class SimpleCacheTransientTest extends WPTestCase
 {
 
     use CommonTrait, SimpleCacheTestTrait;
@@ -68,59 +68,7 @@ class TransientSimpleCacheTest extends WPTestCase
         return $sut;
     }
 
-    public function createSimpleCache(): SimpleCache
-    {
-        return $this->makeInstance();
-    }
-
-    /**
-     * @test
-     */
-    public function setTransient()
-    {
-        $this->makeInstance()->set('key', 'value');
-        $this->assertSame('value', \get_transient('key'), '');
-    }
-
-    /**
-     * @test
-     */
-    public function getTransient()
-    {
-        \set_transient('key', 'value');
-        $this->assertSame('value', $this->makeInstance()->get('key'), '');
-    }
-
-    /**
-     * @test
-     */
-    public function getRealTransient()
-    {
-        \set_transient('key', false);
-        $this->assertSame(false, \get_transient('key'), '');
-    }
-
-    /**
-     * @test
-     */
-    public function getValueFromNotPrevSetTransient()
-    {
-        $sut = $this->makeInstance();
-        $this->assertSame(null, $sut->get('some-not-stored-key'), 'Should return null if a value is not set');
-    }
-
-    /**
-     */
-    public function deleteTransient()
-    {
-        \set_transient('key', 'value');
-        $this->assertSame('value', \get_transient('key'), '');
-        $this->makeInstance()->delete('key');
-        $this->assertFalse(\get_transient('key'), '');
-        $this->assertNull($this->makeInstance()->get('key'), '');
-    }
-
-    public function testImplementation()
+    public function testBinaryImplementation()
     {
         $data = '';
         for ($i = 0; $i < 256; $i++) {

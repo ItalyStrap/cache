@@ -107,6 +107,9 @@
         "unit:debug": [
             "@unit --debug"
         ],
+        "clean": [
+            "@php ./vendor/bin/codecept clean"
+        ],
         "cs": [
             "@php vendor/bin/phpcs -p"
         ],

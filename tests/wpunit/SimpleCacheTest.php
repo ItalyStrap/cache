@@ -3,28 +3,30 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\WPUnit;
 
-use ItalyStrap\Cache\SimpleCacheBridge;
+use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Cache\Expiration;
+use ItalyStrap\Storage\BinaryCacheDecorator;
+use ItalyStrap\Storage\Cache;
+use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\SimpleCacheTestTrait;
 use ItalyStrap\Tests\WPTestCase;
-use Psr\SimpleCache\CacheInterface;
 
-class SimpleCacheBridgeTest extends WPTestCase
+class SimpleCacheTest extends WPTestCase
 {
-
     use CommonTrait, SimpleCacheTestTrait;
 
     private array $skippedTests = [
 //      'testSet' => 'Not passed test',
-//      'testSetTtl' => 'Not passed test',
-//      'testSetExpiredTtl' => 'Not passed test',
+      'testSetTtl' => 'The WordPress Object Cache expiration is not used',
+      'testSetExpiredTtl' => 'The WordPress Object Cache expiration is not used',
 //      'testGet' => 'Not passed test',
 //      'testDelete' => 'Not passed test',
 //      'testClear' => 'Not passed test',
 //      'testSetMultiple' => 'Not passed test',
 //      'testSetMultipleWithIntegerArrayKey' => 'Not passed test',
-//      'testSetMultipleTtl' => 'Not passed test',
-//      'testSetMultipleExpiredTtl' => 'Not passed test',
+      'testSetMultipleTtl' => 'The WordPress Object Cache expiration is not used',
+      'testSetMultipleExpiredTtl' => 'The WordPress Object Cache expiration is not used',
 //      'testSetMultipleWithGenerator' => 'Not passed test',
 //      'testGetMultiple' => 'Not passed test',
 //      'testGetMultipleWithGenerator' => 'Not passed test',
@@ -60,9 +62,9 @@ class SimpleCacheBridgeTest extends WPTestCase
 //      'testObjectDoesNotChangeInCache' => 'Not passed test',
     ];
 
-    private function makeInstance(): CacheInterface
+    private function makeInstance(): SimpleCache
     {
-        $sut = new SimpleCacheBridge((new CachePoolTest())->makeInstance());
+        $sut = new SimpleCache(new Cache());
         return $sut;
     }
 

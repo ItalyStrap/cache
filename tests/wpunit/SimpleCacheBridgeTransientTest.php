@@ -9,7 +9,7 @@ use ItalyStrap\Tests\SimpleCacheTestTrait;
 use ItalyStrap\Tests\WPTestCase;
 use Psr\SimpleCache\CacheInterface;
 
-class SimpleCacheBridgeTest extends WPTestCase
+class SimpleCacheBridgeTransientTest extends WPTestCase
 {
 
     use CommonTrait, SimpleCacheTestTrait;
@@ -62,8 +62,27 @@ class SimpleCacheBridgeTest extends WPTestCase
 
     private function makeInstance(): CacheInterface
     {
-        $sut = new SimpleCacheBridge((new CachePoolTest())->makeInstance());
+        $sut = new SimpleCacheBridge((new CachePoolTransientTest())->makeInstance());
         return $sut;
+    }
+
+    public function testBasicUsageWithLongKey()
+    {
+        if (isset($this->skippedTests[__FUNCTION__])) {
+            $this->markTestSkipped($this->skippedTests[__FUNCTION__]);
+        }
+
+        $key = str_repeat('a', 172);
+
+        $this->assertFalse($this->cache->has($key));
+        $this->assertTrue($this->cache->set($key, 'value'));
+
+        $this->assertTrue($this->cache->has($key));
+        $this->assertSame('value', $this->cache->get($key));
+
+        $this->assertTrue($this->cache->delete($key));
+
+        $this->assertFalse($this->cache->has($key));
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ItalyStrap\Tests\Benchmark;
 
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
 /**
  * @BeforeMethods({"init"})
@@ -31,7 +32,9 @@ class SimpleCacheBench
             return true;
         });
 
-        $this->cache = new SimpleCache();
+        $this->cache = new SimpleCache(
+            new Transient()
+        );
     }
 
     /**
