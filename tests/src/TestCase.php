@@ -12,67 +12,33 @@ use function tad\FunctionMockerLe\undefineAll;
 class TestCase extends Unit
 {
 
-    use ProphecyTrait;
+    use ProphecyTrait, StubFunctionsDefinitionTrait;
 
     /**
      * @var \UnitTester
      */
     protected $tester;
 
-    protected array $store = [];
-    protected bool $set_return_value = true;
-    protected bool $delete_return_value = true;
-    protected ?int $ttl = 0;
+    protected string $cache_key;
 
-    /**
-     * @var \Closure[]
-     */
-    private array $mockFunctionDefinitions;
-
-    protected \Prophecy\Prophecy\ObjectProphecy $cache;
+    protected \Prophecy\Prophecy\ObjectProphecy $cacheProphecy;
 
     public function makeCache(): CacheInterface
     {
-        return $this->cache->reveal();
+        return $this->cacheProphecy->reveal();
     }
 
 	// phpcs:ignore
 	protected function _before() {
-        $this->mockFunctionDefinitions = [
-            'get_transient' => function (string $key) {
-                if ($this->ttl && $this->ttl < 0) {
-                    return false;
-                }
-
-                return $this->store[ $key ] ?? false;
-            },
-            'set_transient' => function (string $key, $value, $ttl = 0): bool {
-                $this->ttl = $ttl;
-                $this->store[ $key ] = $value;
-                return $this->set_return_value;
-            },
-            'delete_transient' => function (string $key): bool {
-                if (!\array_key_exists($key, $this->store)) {
-                    return false;
-                }
-
-                unset($this->store[ $key ]);
-                return $this->delete_return_value;
-            },
-        ];
-
-        defineWithMap($this->mockFunctionDefinitions);
-
-        $this->cache = $this->prophesize(CacheInterface::class);
+        $this->cache_key = 'widget_list';
+        $this->setUpStubStorageFunctions();
+        $this->cacheProphecy = $this->prophesize(CacheInterface::class);
     }
 
 	// phpcs:ignore
 	protected function _after() {
-        undefineAll(\array_keys($this->mockFunctionDefinitions));
-        $this->store = [];
-        $this->set_return_value = true;
-        $this->delete_return_value = true;
-        $this->ttl = 0;
+        $this->cache_key = '';
+        $this->tearDownStubStorageFunctions();
         $this->prophet->checkPredictions();
     }
 
