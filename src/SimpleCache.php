@@ -16,16 +16,17 @@ use Psr\SimpleCache\InvalidArgumentException;
 class SimpleCache implements PsrSimpleCacheInterface
 {
 
-    use KeyValidatorTrait, ExpirationTrait;
+    use KeyValidatorTrait;
 
     private CacheInterface $driver;
+    private ExpirationInterface $expiration;
     private array $used_keys = [];
     private array $type = [];
 
-    public function __construct(CacheInterface $driver, ClockInterface $clock = null)
+    public function __construct(CacheInterface $driver, ExpirationInterface $expiration = null)
     {
         $this->driver = $driver;
-        $this->initClock($clock);
+        $this->expiration = $expiration ?? new Expiration();
     }
 
     public function has($key): bool
@@ -77,7 +78,7 @@ class SimpleCache implements PsrSimpleCacheInterface
         $this->addValueType((string)$key, $value);
 
         try {
-            $this->validateTime($ttl);
+            $this->expiration->expiresAfter($ttl);
         } catch (\InvalidArgumentException $e) {
             throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
         }
@@ -85,7 +86,7 @@ class SimpleCache implements PsrSimpleCacheInterface
         return $this->driver->set(
             (string)$key,
             \is_object($value) ? clone $value : $value,
-            $this->expirationInSeconds()
+            $this->expiration->expirationInSeconds()
         );
     }
 

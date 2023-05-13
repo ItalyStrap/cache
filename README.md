@@ -10,6 +10,8 @@
 
 PSR-16 & PSR-6 Cache implementations for WordPress transient and cache the OOP way
 
+** Version 2.0 is a BC breaks please read the following documentation**
+
 ### This is a BC breaks please read the following
 
 ## Table Of Contents
@@ -65,14 +67,19 @@ if (false === ($special_data_to_save = \get_transient('special_data_to_save'))) 
 The data you can save can be anything that is supported by the [Serialization API](https://developer.wordpress.org/reference/functions/maybe_serialize/).
 In short, you can save any scalar value, array, object.
 
-### Common usage with CacheItemPool
+### Moving from Version 1 to Version 2
+
+The first important thing is from the version 2 you need to pass the driver to the constructor of the class.
+The second important thing is that the driver must implement the `StorageInterface` from [Storage API](https://github.com/ItalyStrap/storage).
+
+### Common usage with the Pool cache
 
 ```php
 use ItalyStrap\Cache\Pool;
 use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient();
+$driver = new Transient(); // Or use new Cache()
 $expiration = new Expiration();
 
 $pool = new Pool($driver, $expiration);
@@ -91,52 +98,117 @@ $special_data_to_save = $item->get();
 ['some-key' => 'some value'] === $special_data_to_save; // True
 ```
 
-### Saving cache
+### Common usage with the SimpleCache
 
 ```php
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
-$cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS); // Return bool
+$driver = new Transient(); // Or use new Cache()
+
+$cache = new SimpleCache($driver);
+
+if (false === ($special_data_to_save = $cache->get('special_data_to_save'))) {
+    // It wasn't there, so regenerate the data and save the transient
+    $special_data_to_save = ['some-key' => 'some value'];
+    $cache->set('special_data_to_save', $special_data_to_save, 12 * HOUR_IN_SECONDS);
+}
+
+['some-key' => 'some value'] === $special_data_to_save; // True
 ```
 
-### Fetching cache
+### Deleting cache with Pool
 
 ```php
-use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Cache\Pool;
+use ItalyStrap\Cache\Expiration;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
-$cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
+$driver = new Transient(); // Or use new Cache()
+$expiration = new Expiration();
 
-$fetched_value = $cache->get('special_data_to_save'); // ['some-key' => 'come value']
+$pool = new Pool($driver, $expiration);
+
+$item = $pool->getItem('special_data_to_save');
+$item->set(['some-key' => 'some value']);
+$item->expiresAfter(12 * HOUR_IN_SECONDS);
+$pool->save($item);
+
+$pool->deleteItem('special_data_to_save'); // Return bool
+
+// `::getItem()` will return a new item instance, always
+$pool->getItem('special_data_to_save')->isHit(); // Return false
 ```
 
-### Deleting cache
+
+### Deleting cache with SimpleCache
 
 ```php
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
-$cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
+$driver = new Transient(); // Or use new Cache()
+
+$cache = new SimpleCache($driver);
+
+$cache->set('special_data_to_save', ['some-key' => 'some value'], 12 * HOUR_IN_SECONDS);
 
 $cache->delete('special_data_to_save'); // Return bool
+
+$cache->get('special_data_to_save'); // Return null
 ```
 
-### Check cache exists
+### Check cache exists with Pool
+
+```php
+
+use ItalyStrap\Cache\Pool;
+use ItalyStrap\Cache\Expiration;
+use ItalyStrap\Storage\Transient;
+
+$driver = new Transient(); // Or use new Cache()
+$expiration = new Expiration();
+    
+$pool = new Pool($driver, $expiration);
+
+$item = $pool->getItem('special_data_to_save');
+$item->set(['some-key' => 'some value']);
+$item->expiresAfter(12 * HOUR_IN_SECONDS);
+$pool->save($item);
+
+$pool->hasItem('special_data_to_save'); // Return true
+
+// But also this will return false if the item is expired or not exists
+$pool->hasItem('expired_or_not_existent_value'); // Return false
+```
+
+
+### Check cache exists with SimpleCache
 
 ```php
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
-$cache->has('special_data_to_save'); // Return bool
+$driver = new Transient(); // Or use new Cache()
+
+$cache = new SimpleCache($driver);
+
+$cache->set('special_data_to_save', ['some-key' => 'some value'], 12 * HOUR_IN_SECONDS);
+$cache->has('special_data_to_save'); // Return true
+
+// But also this will return false if the item is expired or not exists
+$cache->has('expired_or_not_existent_value'); // Return false
 ```
 
-### Saving multiple cache
+### Saving multiple cache with SimpleCache
 
 ```php
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
+$driver = new Transient(); // Or use new Cache()
+
+$cache = new SimpleCache($driver);
 
 $values = [
     'key'       => 'value',
@@ -146,47 +218,56 @@ $values = [
 $cache->setMultiple($values, 12 * HOUR_IN_SECONDS); // Return bool
 ```
 
-### Fetching multiple cache
+### Fetching multiple cache with SimpleCache
 
 ```php
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
+$driver = new Transient(); // Or use new Cache()
+
+$cache = new SimpleCache($driver);
 
 $values = [
     'key'       => 'value',
     'key2'      => 'value2',
-    'key3'      => false, // This will be replaced with 'some default value'
+    'key3'      => false, // This will be replaced with 'some default value' because the method pass a default value
 ];
 
 $fetched_values = $cache->getMultiple(\array_keys($values), 'some default value'); // Return values
 ```
 
-### Deleting multiple cache
+### Deleting multiple cache with SimpleCache
 
 ```php
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
+$driver = new Transient(); // Or use new Cache()
+
+$cache = new SimpleCache($driver);
 
 $values = [
     'key'       => 'value',
     'key2'      => 'value2',
-    'key3'      => false, // This will be replaced with 'some default value'
+    'key3'      => false,
 ];
 
 $cache->deleteMultiple(\array_keys($values)); // Return bool
 ```
 
-### Clearing cache
+### Clearing cache with SimpleCache
 
 This method do not clear the entire WordPress cache, only the cache used by client with
 ::set() and ::setMultiple() methods.
 
 ```php
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
+$driver = new Transient(); // Or use new Cache()
+
+$cache = new SimpleCache($driver);
 $cache->set('special_data_to_save',['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
 
 $values = [
@@ -197,6 +278,10 @@ $values = [
 $cache->setMultiple($values, 12 * HOUR_IN_SECONDS);
 
 $cache->clear(); // Return bool
+
+$cache->get('special_data_to_save'); // Return null
+$cache->get('key'); // Return null
+$cache->get('key2'); // Return null
 ```
 
 Cache::clear() will flush 'special_data_to_save', 'key' and 'key2'.
@@ -211,7 +296,7 @@ $cache = new SimpleCache();
 // Get any existing copy of our transient data
 if (false === ($special_data_to_save = $cache->get('special_data_to_save'))) {
     // It wasn't there, so regenerate the data and save the transient
-     $cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
+     $cache->set('special_data_to_save', ['some-key' => 'some value'], 12 * HOUR_IN_SECONDS);
 }
 // Use the data like you would have normally...
 
@@ -220,7 +305,7 @@ if (false === ($special_data_to_save = $cache->get('special_data_to_save'))) {
 // Get any existing copy of our transient data
 if (!$cache->has('special_data_to_save')) {
     // It wasn't there, so regenerate the data and save the transient
-     $cache->set('special_data_to_save', ['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
+     $cache->set('special_data_to_save', ['some-key' => 'some value'], 12 * HOUR_IN_SECONDS);
 }
 // Use the data like you would have normally...
 ```
