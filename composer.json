@@ -79,6 +79,14 @@
         "infection": [
             "@php ./vendor/bin/infection --threads=4"
         ],
+        "infection:filter:temp": [
+            "@php ./vendor/bin/infection --threads=4 --filter=SimpleCacheBridge.php",
+            "@php ./vendor/bin/infection --threads=4 --filter=SimpleCache.php",
+            "@php ./vendor/bin/infection --threads=4 --filter=CacheItemPool.php"
+        ],
+        "infection:filter": [
+            "@php -d max_execution_time=600 ./vendor/bin/infection --threads=4 --filter=CacheItemPool.php"
+        ],
         "bench": [
             "@php ./vendor/bin/phpbench run --report=performance"
         ],

@@ -14,12 +14,8 @@ namespace ItalyStrap\Tests;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-trait CachePoolTestTrait {
-
-	/**
-	 * @type array with functionName => reason.
-	 */
-//    private array $skippedTests = [];
+trait CachePoolTestTrait
+{
 
 	/**
 	 * @type CacheItemPoolInterface

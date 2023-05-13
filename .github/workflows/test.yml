@@ -59,19 +59,20 @@ jobs:
         run: mkdir -p ${{env.APP_FOLDER_PATH}}
 
       - name: Install App
+        working-directory: ${{env.APP_FOLDER_PATH}}
         run: |
           wp core download --version="${{matrix.app_versions}}"
           wp config create --dbname="${{env.DB_NAME}}" --dbuser="${{env.DB_USER}}" --dbpass="${{env.DB_PASSWORD}}" --dbhost="${{env.DB_HOST}}" --dbprefix="${{env.TABLE_PREFIX}}"
           wp core install --url="${{env.APP_HOST}}:${{env.APP_PORT}}" --title="Test" --admin_user="${{env.APP_USER}}" --admin_password="${{env.APP_PASSWORD}}" --admin_email="${{env.APP_USER}}@${{env.APP_HOST}}.test" --skip-email
           wp core update-db
           cp -r $GITHUB_WORKSPACE ${{env.APP_FOLDER_PATH}}/wp-content/${{env.PROJECT_KIND}}/${{env.REPOSITORY_NAME}}
-        working-directory: ${{env.APP_FOLDER_PATH}}
 
       - uses: "ramsey/composer-install@v2"
         with:
           working-directory: "${{env.APP_FOLDER_PATH}}/wp-content/${{env.PROJECT_KIND}}/${{env.REPOSITORY_NAME}}"
 
       - name: Activate ${{env.REPOSITORY_NAME}}
+        working-directory: ${{env.APP_FOLDER_PATH}}
         run: |
           wp plugin deactivate --all
           wp site empty --yes
@@ -80,14 +81,13 @@ jobs:
           chmod -R 777 wp-content/${{env.PROJECT_KIND}}/${{env.REPOSITORY_NAME}}
           ls -la wp-content/${{env.PROJECT_KIND}}/${{env.REPOSITORY_NAME}}
           wp db export wp-content/${{env.PROJECT_KIND}}/${{env.REPOSITORY_NAME}}/tests/_data/dump.sql
-        working-directory: ${{env.APP_FOLDER_PATH}}
 
       - name: Build codeception
-        run: ./vendor/bin/codecept build
         working-directory: ${{env.APP_FOLDER_PATH}}/wp-content/${{env.PROJECT_KIND}}/${{env.REPOSITORY_NAME}}
+        run: ./vendor/bin/codecept build
 
       - name: Run Unit & Integration test
+        working-directory: ${{env.APP_FOLDER_PATH}}/wp-content/${{env.PROJECT_KIND}}/${{env.REPOSITORY_NAME}}
         run: |
           ./vendor/bin/codecept run unit
           ./vendor/bin/codecept run wpunit
-        working-directory: ${{env.APP_FOLDER_PATH}}/wp-content/${{env.PROJECT_KIND}}/${{env.REPOSITORY_NAME}}

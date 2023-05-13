@@ -20,6 +20,9 @@ class CachePoolTransientTest extends TestCase
         CachePoolTestTrait::testBasicUsageWithLongKey as basicUsageWithLongKeyTrait;
     }
 
+	/**
+	 * @type array with functionName => reason.
+	 */
     private array $skippedTests = [
 //      'testBasicUsageWithLongKey' => 'Max length accepted for the key is 180 chars.',
 

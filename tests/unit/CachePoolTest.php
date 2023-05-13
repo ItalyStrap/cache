@@ -16,6 +16,9 @@ class CachePoolTest extends TestCase
 
     use CommonTrait, CachePoolTestTrait;
 
+	/**
+	 * @type array with functionName => reason.
+	 */
     private array $skippedTests = [
 //      'testBasicUsageWithLongKey' => 'Max length accepted for the key is 180 chars.',
 
