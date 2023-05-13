@@ -62,7 +62,7 @@ class SimpleCacheBridgeTransientTest extends WPTestCase
 
     private function makeInstance(): CacheInterface
     {
-        $sut = new SimpleCacheBridge((new CachePoolTransientTest())->makeInstance());
+        $sut = new SimpleCacheBridge((new PoolTransientTest())->makeInstance());
         return $sut;
     }
 

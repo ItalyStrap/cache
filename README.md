@@ -31,9 +31,17 @@ This package adheres to the [SemVer](http://semver.org/) specification and will 
 
 ## Basic Usage
 
-From [WordPress Transients API docs](https://codex.wordpress.org/Transients_API)
+From [WordPress Transients API docs](https://developer.wordpress.org/apis/transients/)
+From [WordPress Cache API docs](https://developer.wordpress.org/reference/classes/wp_object_cache/)
+
+This is an implementation of the [PSR-16](https://www.php-fig.org/psr/psr-16/) and [PSR-6](https://www.php-fig.org/psr/psr-6/) cache interfaces for WordPress.
+This means that the API is the same as the one defined in the PSR-16 and PSR-6 specifications, and the driver uses the Transients and Object Cache APIs to store the data, but if you need to use other APIs, you can create your own driver.
+The used driver inherits the interface from [Storage API](https://github.com/ItalyStrap/storage).
 
 ### Timer constants
+
+Inside WordPress there are some constants that can be used to express time in seconds.
+Here is a list of them:
 
 ```php
 const MINUTE_IN_SECONDS  = 60; // (seconds)
@@ -44,7 +52,7 @@ const MONTH_IN_SECONDS   = 30 * DAY_IN_SECONDS;
 const YEAR_IN_SECONDS    = 365 * DAY_IN_SECONDS;
 ```
 
-### Common usage with WordPress Transients API
+### Common usage with builtin WordPress Transients API
 
 ```php
 if (false === ($special_data_to_save = \get_transient('special_data_to_save'))) {
@@ -54,22 +62,33 @@ if (false === ($special_data_to_save = \get_transient('special_data_to_save'))) 
 }
 ```
 
+The data you can save can be anything that is supported by the [Serialization API](https://developer.wordpress.org/reference/functions/maybe_serialize/).
+In short, you can save any scalar value, array, object.
+
 ### Common usage with CacheItemPool
 
 ```php
-use ItalyStrap\Cache\CacheItemPool;
+use ItalyStrap\Cache\Pool;
+use ItalyStrap\Cache\Expiration;
+use ItalyStrap\Storage\Transient;
 
-$pool = new CacheItemPool();
+$driver = new Transient();
+$expiration = new Expiration();
+
+$pool = new Pool($driver, $expiration);
+
+// Pass the pool object to other classes that need to save data
+// then retrieve the data from the pool
 $item = $pool->getItem('special_data_to_save');
 if (! $item->isHit()) {
     // It wasn't there, so regenerate the data and save the transient
-    $item->set(['some-key' => 'come value']);
+    $item->set(['some-key' => 'some value']);
     $item->expiresAfter(12 * HOUR_IN_SECONDS);
     $pool->save($item);
 }
 $special_data_to_save = $item->get();
 
-'special_data_to_save' === $special_data_to_save; // True
+['some-key' => 'some value'] === $special_data_to_save; // True
 ```
 
 ### Saving cache

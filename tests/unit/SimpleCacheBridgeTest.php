@@ -62,7 +62,7 @@ class SimpleCacheBridgeTest extends TestCase
 
     private function makeInstance(): CacheInterface
     {
-        $sut = new SimpleCacheBridge((new CachePoolTest())->makeInstance());
+        $sut = new SimpleCacheBridge((new PoolTest())->makeInstance());
         return $sut;
     }
 

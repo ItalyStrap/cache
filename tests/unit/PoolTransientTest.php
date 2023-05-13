@@ -3,18 +3,22 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\Unit;
 
-use ItalyStrap\Cache\CacheItemPool;
+use ItalyStrap\Cache\Pool;
 use ItalyStrap\Cache\Expiration;
-use ItalyStrap\Storage\Cache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
+use ItalyStrap\Storage\Transient;
 use ItalyStrap\Tests\CachePoolTestTrait;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\TestCase;
 use Psr\Cache\CacheItemPoolInterface;
 
-class CachePoolTest extends TestCase
+class PoolTransientTest extends TestCase
 {
 
-    use CommonTrait, CachePoolTestTrait;
+    use CommonTrait;
+    use CachePoolTestTrait {
+        CachePoolTestTrait::testBasicUsageWithLongKey as basicUsageWithLongKeyTrait;
+    }
 
     /**
      * @type array with functionName => reason.
@@ -72,7 +76,8 @@ class CachePoolTest extends TestCase
 
     public function makeInstance(): CacheItemPoolInterface
     {
-        return new CacheItemPool(new Cache(), new Expiration());
+        $sut = new Pool(new BinaryCacheDecorator(new Transient()), new Expiration());
+        return $sut;
     }
 
     /**
@@ -82,7 +87,6 @@ class CachePoolTest extends TestCase
     {
         $expected = \array_fill(0, 2, 'Some value ');
         $pool_was_called = false;
-
 
         $pool = $this->makeInstance();
         $item = $pool->getItem($this->cache_key);
@@ -96,7 +100,31 @@ class CachePoolTest extends TestCase
         $this->assertSame($expected, $item->get(), '');
         $this->assertTrue($pool_was_called, '');
         $this->assertSame($this->cache_key, $item->getKey(), '');
-        $this->assertSame(\wp_cache_get($this->cache_key), $item->get(), '');
+        $this->assertSame(\get_transient($this->cache_key), $item->get(), '');
+
+        $pool->clear();
+        $this->assertFalse(\get_transient($this->cache_key), '');
+    }
+
+    public function testVerifyValueIsInTransient()
+    {
+        $data = 'Some data';
+        $key = 'key';
+
+        \set_transient($key, $data, -10);
+
+        $sut = $this->makeInstance();
+        $item = $sut->getItem($key);
+        if (null === ( $value = $item->get() )) {
+        }
+
+        $this->assertSame($value, null, 'Value should be expired');
+    }
+
+    public function testBasicUsageWithLongKey()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->basicUsageWithLongKeyTrait();
     }
 
     /**
@@ -112,5 +140,25 @@ class CachePoolTest extends TestCase
         $items = $this->cache->getItems(['key1', $key, 'key2']);
         foreach ($items as $item) {
         }
+    }
+
+    /**
+     * @test
+     */
+    public function expirationToZero(): void
+    {
+        $expected = \array_fill(0, 2, 'Some value ');
+        $pool_was_called = false;
+
+        $pool = $this->makeInstance();
+        $item = $pool->getItem($this->cache_key);
+        $item->set($expected);
+        $item->expiresAfter(0);
+        $pool_was_called = $pool->save($item);
+
+        $this->assertSame(null, $item->get(), '');
+        $this->assertTrue($pool_was_called, '');
+        $this->assertSame($this->cache_key, $item->getKey(), '');
+        $this->assertSame(\get_transient($this->cache_key), false, '');
     }
 }

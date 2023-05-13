@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\WPUnit;
 
-use ItalyStrap\Cache\CacheItemPool;
+use ItalyStrap\Cache\Pool;
 use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Storage\Cache;
 use ItalyStrap\Tests\CachePoolTestTrait;
@@ -11,7 +11,7 @@ use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\WPTestCase;
 use Psr\Cache\CacheItemPoolInterface;
 
-class CachePoolTest extends WPTestCase
+class PoolTest extends WPTestCase
 {
 
     use CommonTrait, CachePoolTestTrait;
@@ -72,7 +72,7 @@ class CachePoolTest extends WPTestCase
 
     public function makeInstance(): CacheItemPoolInterface
     {
-        return new CacheItemPool(new Cache(), new Expiration());
+        return new Pool(new Cache(), new Expiration());
     }
 
     /**

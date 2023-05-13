@@ -6,7 +6,7 @@ namespace ItalyStrap\Cache;
 use ItalyStrap\Storage\CacheInterface;
 use Psr\Cache\CacheItemInterface;
 
-class CacheItem implements CacheItemInterface
+class Item implements CacheItemInterface
 {
 
     private string $key;

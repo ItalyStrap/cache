@@ -12,7 +12,7 @@ use Psr\Cache\InvalidArgumentException;
 /**
  * @psalm-api
  */
-class CacheItemPool implements CacheItemPoolInterface
+class Pool implements CacheItemPoolInterface
 {
 
     use BasicPoolTrait, KeyValidatorTrait;
@@ -55,7 +55,7 @@ class CacheItemPool implements CacheItemPoolInterface
         }
 
         /** @psalm-suppress RedundantCastGivenDocblockType */
-        return new CacheItem((string)$key, $this->driver, $this->expiration);
+        return new Item((string)$key, $this->driver, $this->expiration);
     }
 
     public function getItems(iterable $keys = []): iterable
