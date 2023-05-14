@@ -29,16 +29,22 @@ composer require italystrap/cache
 ```
 This package adheres to the [SemVer](http://semver.org/) specification and will be fully backward compatible between minor versions.
 
-## Basic Usage
+For more information about the WordPress API:
 
 * [WordPress Transients API docs](https://developer.wordpress.org/apis/transients/)
 * [WordPress Cache API docs](https://developer.wordpress.org/reference/classes/wp_object_cache/)
+
+## Why this package?
+
+Initially I created this package to use the [PSR-16](https://www.php-fig.org/psr/psr-16/) cache interface in WordPress, but starting from this issue [#4](https://github.com/ItalyStrap/cache/issues/4) I decided to extract the drivers and also add the [PSR-6](https://www.php-fig.org/psr/psr-6/) cache interface too.
 
 From version 2.0 I also added the PSR-6 implementation, so you can also use the `Pool` class to cache your data if you need it.
 
 So this package now support both the [PSR-16](https://www.php-fig.org/psr/psr-16/) and [PSR-6](https://www.php-fig.org/psr/psr-6/) cache interfaces.
 
 The driver required by this package uses the Transients and Object Cache APIs from WordPress to store the data, but if you need to use other APIs, you can create your own driver because just implements the interface from [Storage API](https://github.com/ItalyStrap/storage).
+
+## Basic Usage
 
 ### Timer constants
 
@@ -303,8 +309,11 @@ Cache::clear() will flush 'special_data_to_save', 'key' and 'key2'.
 
 ```php
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\Transient;
 
-$cache = new SimpleCache();
+$driver = new Transient(); // Or use new Cache()
+
+$cache = new SimpleCache($driver);
 
 // Get any existing copy of our transient data
 if (false === ($special_data_to_save = $cache->get('special_data_to_save'))) {
@@ -336,9 +345,4 @@ This code is licensed under the [MIT](LICENSE).
 ## Credits
 
 * [DoctrineSimpleCache](https://github.com/Roave/DoctrineSimpleCache)
-
-## To read
-
-* https://json5.org/
-* https://github.com/Roave/infection-static-analysis-plugin
-* https://www.sitepoint.com/creating-strictly-typed-arrays-collections-php/
+* [PHP Cache organisation](https://github.com/php-cache/integration-tests)

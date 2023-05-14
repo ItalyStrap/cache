@@ -11,7 +11,3 @@ infection.json
 
 ## Docker
 .docker/
-
-## Temp files
-tests/unit/ExpirationTest.php
-tests/wpunit/ExpirationTest.php
