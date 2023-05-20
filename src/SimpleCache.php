@@ -23,10 +23,10 @@ class SimpleCache implements PsrSimpleCacheInterface
     private array $used_keys = [];
     private array $type = [];
 
-    public function __construct(CacheInterface $driver, ExpirationInterface $expiration = null)
+    public function __construct(CacheInterface $driver, ExpirationInterface $expiration)
     {
         $this->driver = $driver;
-        $this->expiration = $expiration ?? new Expiration();
+        $this->expiration = $expiration;
     }
 
     public function has($key): bool

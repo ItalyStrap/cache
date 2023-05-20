@@ -42,7 +42,27 @@ From version 2.0 I also added the PSR-6 implementation, so you can also use the 
 
 So this package now support both the [PSR-16](https://www.php-fig.org/psr/psr-16/) and [PSR-6](https://www.php-fig.org/psr/psr-6/) cache interfaces.
 
-The driver required by this package uses the Transients and Object Cache APIs from WordPress to store the data, but if you need to use other APIs, you can create your own driver because just implements the interface from [Storage API](https://github.com/ItalyStrap/storage).
+The driver required by this package uses the Transients and Object Cache APIs from WordPress to store the data, but if you need to use other APIs, you can create your own driver because just implements the interface `\ItalyStrap\Storage\CacheInterface` from [Storage API](https://github.com/ItalyStrap/storage).
+
+### Moving from Version 1 to Version 2
+
+The first important thing is from the version 2 you need to pass the driver object and the expiration object to the constructor of the class you want to use.
+
+`SimpleCache` and `Pool` are the two classes that need the driver and the expiration to be passed to the constructor.
+
+The driver is an object wrapper for the WordPress Transient API and the WordPress Object Cache API.
+
+The expiration object is used to set the expiration time of the cache.
+
+Below in the documentation you will find the name of the drivers that you can use and the expiration object.
+
+The second important thing is that the driver must implement the `CacheInterface` from [Cache API](https://github.com/ItalyStrap/storage), this way if you need to create your own driver you can do it simply by implementing the interface.
+
+### Why the needs of an Expiration object?
+
+The expiration object is used to set the expiration time of the cache.
+
+Because I want to be as close as possible to the PSR-16 and PSR-6 specifications, I have created an object that is responsible for setting the expiration time, this way I can reuse the same logic across all PSR-16 and PSR-6 implementations and I didn't need to create more methods that are not in the specifications.
 
 ## Basic Usage
 
@@ -60,6 +80,21 @@ const MONTH_IN_SECONDS   = 30 * DAY_IN_SECONDS;
 const YEAR_IN_SECONDS    = 365 * DAY_IN_SECONDS;
 ```
 
+Or you can use the built-in constant from `ItalyStrap\Cache\ExpirationInterface`:
+
+```php
+use ItalyStrap\Cache\ExpirationInterface;
+
+$expirationTime = ExpirationInterface::MINUTE_IN_SECONDS;
+$expirationTime = ExpirationInterface::HOUR_IN_SECONDS;
+$expirationTime = ExpirationInterface::DAY_IN_SECONDS;
+$expirationTime = ExpirationInterface::WEEK_IN_SECONDS;
+$expirationTime = ExpirationInterface::MONTH_IN_SECONDS;
+$expirationTime = ExpirationInterface::YEAR_IN_SECONDS;
+```
+
+Or you can use the built-in PHP function `strtotime()` to express time in seconds.
+
 ### Common usage with builtin WordPress Transients API
 
 ```php
@@ -72,24 +107,6 @@ if (false === ($special_data_to_save = \get_transient('special_data_to_save'))) 
 
 The data you can save can be anything that is supported by the [Serialization API](https://developer.wordpress.org/reference/functions/maybe_serialize/).
 In short, you can save any scalar value, array, object.
-
-### Moving from Version 1 to Version 2
-
-The first important thing is from the version 2 you need to pass the driver to the constructor of the class you want to use.
-
-`SimpleCache` and `Pool` are the two classes that need the driver to be passed to the constructor.
-
-The driver is an object wrapper for the WordPress Transient API and the WordPress Object Cache API.
-
-Below in the documentation you will find the name of the drivers that you can use.
-
-The second important thing is that the driver must implement the `CacheInterface` from [Cache API](https://github.com/ItalyStrap/storage), this way if you need to create your own driver you can do it simply by implementing the interface.
-
-### Why the needs of an Expiration object?
-
-The expiration object is used to set the expiration time of the cache.
-
-Because I want to be as close as possible to the PSR-16 and PSR-6 specifications, I have created an object that is responsible for setting the expiration time, this way I can reuse the same logic across all PSR-16 and PSR-6 implementations and I didn't need to create more methods that are not in the specifications.
 
 ### Common usage with the Pool cache
 
