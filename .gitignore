@@ -1,8 +1,13 @@
+## Composer
 /vendor/
+*.lock
 
-/_others/
-
+## WP Bowser
 *.local
 codeception.yml
-*.lock
-infection.json.dist
+
+## Infection
+infection.json
+
+## Docker
+.docker/

@@ -3,229 +3,235 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Cache;
 
-use ArrayObject;
-use DateInterval;
-use DateTime;
-use Exception;
-use ItalyStrap\Cache\Exceptions\InvalidArgumentSimpleCacheException;
+use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
+use ItalyStrap\Storage\CacheInterface;
+use ItalyStrap\Storage\ClearableInterface;
+use Psr\Clock\ClockInterface;
 use Psr\SimpleCache\CacheInterface as PsrSimpleCacheInterface;
-use Traversable;
-use function array_keys;
-use function delete_transient;
-use function get_class;
-use function get_transient;
-use function gettype;
-use function intval;
-use function is_array;
-use function is_object;
-use function is_string;
-use function iterator_to_array;
-use function set_transient;
-use function sprintf;
+use Psr\SimpleCache\InvalidArgumentException;
 
-class SimpleCache implements PsrSimpleCacheInterface {
+/**
+ * @psalm-api
+ */
+class SimpleCache implements PsrSimpleCacheInterface
+{
 
+    use KeyValidatorTrait;
 
-	/**
-	 * Data value of the transient
-	 *
-	 * @var array
-	 */
-	private $used_keys = [];
+    private CacheInterface $driver;
+    private ExpirationInterface $expiration;
+    private array $used_keys = [];
+    private array $type = [];
 
-	/**
-	 * @inheritDoc
-	 */
-	public function has( $key ): bool {
-		return $this->get( $key, false ) !== false;
-	}
+    public function __construct(CacheInterface $driver, ExpirationInterface $expiration)
+    {
+        $this->driver = $driver;
+        $this->expiration = $expiration;
+    }
 
-	/**
-	 * @inheritDoc
-	 * If you need to store booleans use 0 or 1 because
-	 * get_transient() return false if value is not set or is expired
-	 * @see get_transient()
-	 */
-	public function get( $key, $default = null ) {
-		$this->assertKeyIsValid( $key );
-		$this->addUsedKey( $key );
+    public function has($key): bool
+    {
+        return $this->get($key) !== null;
+    }
 
-		$value = get_transient( $key );
-		if ( false === $value ) {
-			$value = $default;
-		}
+    /**
+     * @param mixed $key
+     * @param mixed $default
+     * @return bool|mixed|null
+     */
+    public function get($key, $default = null)
+    {
+        $this->assertKeyIsValid($key);
+        $this->addUsedKey((string)$key);
 
-		return $value;
-	}
+        /**
+         * This is a bit tricky because transient return false not as value but
+         * as if no value is stored, as usual...
+         * If no value is stored the array key does not exist, so it will return $default = null as value
+         * This should be almost safe.
+         * Normally you do something like this: `false === get_transient('some-key')`
+         * With this you simply call SimpleCache::has('some-key');
+         * @var mixed $value
+         */
+        $value = $this->driver->get((string)$key);
+        if (\array_key_exists((string)$key, $this->type) && $this->type[(string)$key] === 'boolean') {
+            return (bool)$value;
+        }
 
-	/**
-	 * @inheritDoc
-	 * @throws Exception
-	 */
-	public function set( $key, $value, $ttl = null ): bool {
-		$this->assertKeyIsValid( $key );
-		$this->addUsedKey( $key );
+        if ($value === 0) {
+            return 0;
+        }
 
-		if ($ttl instanceof DateInterval) {
-			$ttl = $this->convertDateIntervalToInteger($ttl);
-		}
+        return $value ?: $default;
+    }
 
-		return set_transient( $key, $value, intval($ttl) );
-	}
+    /**
+     * @param mixed $key
+     * @param mixed $value
+     * @param \DateInterval|int|null $ttl
+     * @return bool
+     */
+    public function set($key, $value, $ttl = null): bool
+    {
+        $this->assertKeyIsValid($key);
+        $this->addUsedKey((string)$key);
+        $this->addValueType((string)$key, $value);
 
-	/**
-	 * @inheritDoc
-	 */
-	public function delete( $key ): bool {
-		$this->assertKeyIsValid( $key );
-		$this->deleteUsedKey( $key );
-		return delete_transient( $key );
-	}
+        try {
+            $this->expiration->expiresAfter($ttl);
+        } catch (\InvalidArgumentException $e) {
+            throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+        }
 
-	/**
-	 * @inheritDoc
-	 */
-	public function getMultiple( $keys, $default = null ) {
-		$keys = $this->assertKeysAreValid( $keys );
+        return $this->driver->set(
+            (string)$key,
+            \is_object($value) ? clone $value : $value,
+            $this->expiration->expirationInSeconds()
+        );
+    }
 
-		$data = [];
+    public function delete($key): bool
+    {
+        $this->assertKeyIsValid($key);
 
-		foreach ( $keys as $key ) {
-			$data[ $key ] = $this->get( $key, $default );
-		}
+        if (!$this->has($key)) {
+            $this->deleteUsedKey($key);
+            return true;
+        }
 
-		return $data;
-	}
+        $this->deleteUsedKey($key);
+        return $this->driver->delete($key);
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	public function setMultiple( $values, $ttl = null ): bool {
-		$values = $this->toArray($values, 'values');
+    /**
+     * @param mixed $keys
+     * @param mixed $default
+     * @psalm-return \Generator<mixed, mixed|null, mixed, never>
+     */
+    public function getMultiple($keys, $default = null): iterable
+    {
+        if (!\is_iterable($keys)) {
+            throw new SimpleCacheInvalidArgumentException('Cache keys must be array or Traversable');
+        }
 
-		$success = true;
-		foreach ( $values as $key => $value ) {
-			if ( $this->set( $key, $value, $ttl ) ) {
-				continue;
-			}
-			$success = false;
-		}
+        $gen =
+            /**
+             * @psalm-return \Generator<mixed, mixed|null, mixed, never>
+             */
+        function () use ($keys, $default): \Generator {
+            /** @var string[] $keys */
+            foreach ($keys as $key) {
+                /** @psalm-suppress InvalidCatch */
+                try {
+                    yield $key => $this->get($key, $default);
+                } catch (InvalidArgumentException $e) {
+                    throw new SimpleCacheInvalidArgumentException($e->getMessage(), (int)$e->getCode());
+                }
+            }
+        };
 
-		return $success;
-	}
+        return $gen();
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	public function deleteMultiple( $keys ): bool {
-		$keys = $this->assertKeysAreValid( $keys );
-		$success = true;
-		/** @var string $key */
-		foreach ( $keys as $key ) {
-			if ( $this->delete( $key ) ) {
-				continue;
-			}
-			$success = false;
-		}
+    /**
+     * @param mixed $values
+     * @param \DateInterval|int|null $ttl
+     * @return bool
+     */
+    public function setMultiple($values, $ttl = null): bool
+    {
+        if (!\is_iterable($values)) {
+            throw new SimpleCacheInvalidArgumentException('Cache values must be array or Traversable');
+        }
 
-		return $success;
-	}
+        /**
+         * @var string $key
+         * @var mixed $value
+         */
+        foreach ($values as $key => $value) {
+            if ($this->set($key, $value, $ttl)) {
+                continue;
+            }
+            return false;
+        }
 
-	/**
-	 * @psalm-suppress InvalidThrow
-	 * @inheritDoc
-	 * @throws \Psr\SimpleCache\InvalidArgumentException
-	 */
-	public function clear(): bool {
-		return $this->deleteMultiple( $this->usedKeys() );
-	}
+        return true;
+    }
 
-	/**
-	 * @psalm-suppress ReservedWord
-	 * @param mixed $key
-	 */
-	private function assertKeyIsValid( $key ): void {
-		if ( ! is_string( $key ) ) {
-			throw new InvalidArgumentSimpleCacheException( sprintf(
-				'The $key must be a string, %s given',
-				gettype( $key )
-			) );
-		}
+    /**
+     * @param iterable|mixed $keys
+     * @return bool
+     */
+    public function deleteMultiple($keys): bool
+    {
+        if (!\is_iterable($keys)) {
+            throw new SimpleCacheInvalidArgumentException('Cache keys must be array or Traversable');
+        }
 
-		if ( empty( $key ) ) {
-			throw new InvalidArgumentSimpleCacheException( 'The $key must be not empty' );
-		}
-	}
+        /** @var string[] $keys */
+        foreach ($keys as $key) {
+            if ($this->delete($key)) {
+                continue;
+            }
+            return false;
+        }
 
-	/**
-	 * @param DateInterval $ttl
-	 * @return int
-	 * @throws Exception
-	 * @author Roave\DoctrineSimpleCache;
-	 */
-	private function convertDateIntervalToInteger( DateInterval $ttl ) : int {
-		// Timestamp has 2038 year limitation, but it's unlikely to set TTL that long.
-		return (new DateTime())
-			->setTimestamp(0)
-			->add($ttl)
-			->getTimestamp();
-	}
+        return true;
+    }
 
-	/**
-	 * @param array|iterable $keys
-	 * @return array<string>
-	 */
-	private function assertKeysAreValid( $keys ): array {
-		$keys = $this->toArray($keys, 'keys');
-		return $keys;
-	}
+    public function clear(): bool
+    {
+        $cleared = true;
+        if ($this->driver instanceof ClearableInterface) {
+            $cleared = $this->driver->clear();
+        }
 
-	/**
-	 * @param iterable $other
-	 * @param string $type
-	 * @return array
-	 * @author Sebastian Bergmann PHPUnit
-	 */
-	private function toArray($other, $type = 'keys'): array {
-		if ( is_array($other)) {
-			return $other;
-		}
+        return $cleared && $this->deleteMultiple($this->usedKeys());
+    }
 
-		if ($other instanceof ArrayObject) {
-			return $other->getArrayCopy();
-		}
+    /**
+     * @param mixed $key
+     * @return void
+     */
+    private function assertKeyIsValid($key): void
+    {
+        try {
+            $this->validateKey($key);
+        } catch (\InvalidArgumentException $e) {
+            throw new SimpleCacheInvalidArgumentException($e->getMessage(), $e->getCode());
+        }
+    }
 
-		if ($other instanceof Traversable) {
-			return iterator_to_array($other);
-		}
+    /**
+     * @param string|int $key
+     * @return void
+     */
+    private function addUsedKey($key): void
+    {
+        $this->used_keys[ $key ] = $key;
+    }
 
-		throw new InvalidArgumentSimpleCacheException(
-			sprintf(
-				'Cache %s must be array or Traversable, "%s" given',
-				$type,
-				is_object( $other ) ? get_class( $other ) : gettype( $other )
-			)
-		);
-	}
+    /**
+     * @param string|int $key
+     * @return void
+     */
+    private function deleteUsedKey($key): void
+    {
+        unset($this->used_keys[ $key ]);
+    }
 
-	/**
-	 * @param string $key
-	 */
-	private function addUsedKey( $key ): void {
-		$this->used_keys[ $key ] = $key;
-	}
+    private function usedKeys(): array
+    {
+        return $this->used_keys;
+    }
 
-	/**
-	 * @param string $key
-	 */
-	private function deleteUsedKey( $key ): void {
-		unset( $this->used_keys[ $key ] );
-	}
-
-	/**
-	 * @return array
-	 */
-	private function usedKeys(): array {
-		return $this->used_keys;
-	}
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
+    private function addValueType(string $key, $value): void
+    {
+        $this->type[$key] = \gettype($value);
+    }
 }

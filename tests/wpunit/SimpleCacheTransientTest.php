@@ -1,30 +1,31 @@
 <?php
 declare(strict_types=1);
 
-namespace ItalyStrap\Tests\Unit;
+namespace ItalyStrap\Tests\WPUnit;
 
 use ItalyStrap\Cache\Factory;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\SimpleCacheTestTrait;
-use ItalyStrap\Tests\TestCase;
+use ItalyStrap\Tests\WPTestCase;
 
-class SimpleCacheTest extends TestCase
+class SimpleCacheTransientTest extends WPTestCase
 {
 
     use CommonTrait, SimpleCacheTestTrait;
 
     private array $skippedTests = [
 //      'testSet' => 'Not passed test',
-        'testSetTtl' => 'The WordPress Object Cache expiration is not used',
-        'testSetExpiredTtl' => 'The WordPress Object Cache expiration is not used',
+//      'testSetTtl' => 'Not passed test',
+//      'testSetExpiredTtl' => 'Not passed test',
 //      'testGet' => 'Not passed test',
 //      'testDelete' => 'Not passed test',
 //      'testClear' => 'Not passed test',
 //      'testSetMultiple' => 'Not passed test',
 //      'testSetMultipleWithIntegerArrayKey' => 'Not passed test',
-        'testSetMultipleTtl' => 'The WordPress Object Cache expiration is not used',
-        'testSetMultipleExpiredTtl' => 'The WordPress Object Cache expiration is not used',
+//      'testSetMultipleTtl' => 'Not passed test',
+//      'testSetMultipleExpiredTtl' => 'Not passed test',
 //      'testSetMultipleWithGenerator' => 'Not passed test',
 //      'testGetMultiple' => 'Not passed test',
 //      'testGetMultipleWithGenerator' => 'Not passed test',
@@ -60,9 +61,50 @@ class SimpleCacheTest extends TestCase
 //      'testObjectDoesNotChangeInCache' => 'Not passed test',
     ];
 
-    public function makeInstance(): SimpleCache
+    private function makeInstance(): SimpleCache
     {
-        return (new Factory())->makeSimpleCache();
+        return (new Factory())->makeSimpleCacheTransient();
+    }
+
+    public function testBinaryImplementation()
+    {
+        $data = '';
+        for ($i = 0; $i < 256; $i++) {
+            $data .= chr($i);
+        }
+
+        $key = 'key';
+        \add_filter("transient_$key", function ($value) use ($key, $data) {
+            $generated_key = \md5(BinaryCacheDecorator::class . $key);
+            return [$generated_key => base64_encode($data)];
+        });
+
+        $sut = $this->makeInstance();
+        if (null === ( $value = $sut->get($key) )) {
+            $sut->set($key, $data);
+            $this->fail('It should not be reached.');
+        }
+
+        $this->assertSame($data, $value, '');
+    }
+
+    public function testBasicUsageWithLongKey()
+    {
+        if (isset($this->skippedTests[__FUNCTION__])) {
+            $this->markTestSkipped($this->skippedTests[__FUNCTION__]);
+        }
+
+        $key = str_repeat('a', 172);
+
+        $this->assertFalse($this->cache->has($key));
+        $this->assertTrue($this->cache->set($key, 'value'));
+
+        $this->assertTrue($this->cache->has($key));
+        $this->assertSame('value', $this->cache->get($key));
+
+        $this->assertTrue($this->cache->delete($key));
+
+        $this->assertFalse($this->cache->has($key));
     }
 
     /**

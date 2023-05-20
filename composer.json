@@ -1,61 +1,148 @@
 {
     "name": "italystrap/cache",
     "description": "Simple PSR-16 cache implementations for WordPress transient the OOP way",
-    "keywords": [],
+    "keywords": ["psr", "psr-16", "psr-6", "cache", "WordPress", "transient", "transients"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "overclokk",
+            "name": "Enea Overclokk",
             "email": "info@overclokk.net",
             "homepage": "https://www.italystrap.com",
             "role": "Developer"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
-        "php" : ">=7.2",
-        "psr/simple-cache": "^1.0"
+        "php" : ">=7.4",
+        "italystrap/storage": "^1.0",
+        "psr/simple-cache": "^1.0",
+        "psr/cache": "^1.0",
+        "fig/cache-util": "^1.0",
+        "psr/clock": "^1.0"
     },
     "require-dev": {
-        "lucatume/wp-browser": "~2.2",
-        "codeception/c3": "2.*",
+        "lucatume/wp-browser": "^3.1",
         "lucatume/function-mocker-le": "^1.0",
-        "italystrap/debug": "~2.0",
-        "wp-coding-standards/wpcs": "^2.1",
+        "codeception/module-asserts": "^1.0",
+        "codeception/module-db": "^1.2",
+        "codeception/module-phpbrowser": "^1.0",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "cache/integration-tests": "^0.17.0",
+
+        "squizlabs/php_codesniffer": "^3.7",
         "phpcompatibility/php-compatibility": "^9.3",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
-        "phpstan/phpstan": "^0.11.16",
-        "szepeviktor/phpstan-wordpress": "^0.3.0",
-        "phpbench/phpbench": "@dev",
-        "infection/infection": "^0.15.3",
-        "vimeo/psalm": "^3.9",
-        "phpmetrics/phpmetrics": "^2.5",
-        "roave/doctrine-simplecache": "^2.3",
-        "symfony/cache": "^5.0",
-        "psr/cache": "^1.0"
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+
+        "vimeo/psalm": "^5.6",
+        "humanmade/psalm-plugin-wordpress": "^3.0.0-alpha1",
+
+        "phpbench/phpbench": "^1.2",
+        "phpmetrics/phpmetrics": "^2.8",
+
+        "rector/rector": "^0.15.17",
+        "infection/infection": "^0.26.6",
+        "infection/codeception-adapter": "^0.4.1",
+        "italystrap/debug": "^2.1"
     },
     "autoload": {
         "psr-4": {
-            "ItalyStrap\\Cache\\": "src/"
+            "ItalyStrap\\Cache\\": [
+                "src/"
+            ],
+            "ItalyStrap\\Storage\\": [
+                "storage/"
+            ]
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/"
+        ],
+        "psr-4": {
+            "ItalyStrap\\Tests\\": "tests/src/",
+            "ItalyStrap\\Tests\\Unit\\": "tests/unit/",
+            "ItalyStrap\\Tests\\WPUnit\\": "tests/wpunit/"
         }
     },
     "provide": {
-        "psr/simple-cache-implementation": "1.0"
+        "psr/simple-cache-implementation": "1.0|2.0|3.0",
+        "psr/cache-implementation": "1.0|2.0|3.0"
     },
     "scripts": {
-        "check": [
+        "compat": [
             ".\\vendor\\bin\\phpcs -p --standard=PHPCompatibility src"
-        ],
-        "test": [
-            "test"
         ],
         "metrics": [
             "vendor/bin/phpmetrics --report-html='./tests/_output/report' ./src"
+        ],
+        "infection": [
+            "@php ./vendor/bin/infection --threads=4"
+        ],
+        "infection:filter:temp": [
+            "@php ./vendor/bin/infection --threads=4 --filter=SimpleCacheBridge.php",
+            "@php ./vendor/bin/infection --threads=4 --filter=SimpleCache.php",
+            "@php ./vendor/bin/infection --threads=4 --filter=CacheItemPool.php"
+        ],
+        "infection:filter": [
+            "@php -d max_execution_time=600 ./vendor/bin/infection --threads=4 --filter=CacheItemPool.php"
+        ],
+        "bench": [
+            "@php ./vendor/bin/phpbench run --report=performance"
+        ],
+        "psalm": [
+            "@php ./vendor/bin/psalm --no-cache"
+        ],
+        "tests": [
+            "@unit",
+            "@wpunit"
+        ],
+        "wpunit": [
+            "@php ./vendor/bin/codecept run wpunit"
+        ],
+        "wpunit:coverage": [
+            "@php ./vendor/bin/codecept run wpunit --coverage-text"
+        ],
+        "wpunit:debug": [
+            "@wpunit --debug"
+        ],
+        "unit": [
+            "@php ./vendor/bin/codecept run unit"
+        ],
+        "unit:coverage": [
+            "@php ./vendor/bin/codecept run unit --coverage-text"
+        ],
+        "unit:debug": [
+            "@unit --debug"
+        ],
+        "clean": [
+            "@php ./vendor/bin/codecept clean"
+        ],
+        "cs": [
+            "@php vendor/bin/phpcs -p"
+        ],
+        "cs:fix": [
+            "@php vendor/bin/phpcbf -p"
+        ],
+        "qa": [
+            "@compat",
+            "@cs",
+            "@psalm",
+            "@unit",
+            "@wpunit"
         ]
     },
     "support"    : {
-        "issues": "https://github.com/ItalyStrap/cleaner/issues",
-        "source": "https://github.com/ItalyStrap/cleaner"
+        "issues": "https://github.com/ItalyStrap/common/issues",
+        "source": "https://github.com/ItalyStrap/common"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "ocramius/package-versions": true,
+            "cweagans/composer-patches": true,
+            "codeception/c3": true,
+            "infection/extension-installer": true
+        }
     }
 }

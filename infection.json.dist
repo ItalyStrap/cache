@@ -5,10 +5,7 @@
     ]
   },
   "logs": {
-    "text": "php://stdout",
-    "badge": {
-      "branch": "master"
-    }
+    "text": "php://stdout"
   },
   "timeout": 10,
   "mutators": {
