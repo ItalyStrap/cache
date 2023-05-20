@@ -81,13 +81,14 @@ The first important thing is from the version 2 you need to pass the driver to t
 
 The driver is an object wrapper for the WordPress Transient API and the WordPress Object Cache API.
 
-Below in the documentation you will find the name of the driver that you can use.
+Below in the documentation you will find the name of the drivers that you can use.
 
-The second important thing is that the driver must implement the `StorageInterface` from [Storage API](https://github.com/ItalyStrap/storage), this way if you need tp create your own driver you can do it simply by implementing the interface.
+The second important thing is that the driver must implement the `CacheInterface` from [Cache API](https://github.com/ItalyStrap/storage), this way if you need to create your own driver you can do it simply by implementing the interface.
 
 ### Why the needs of an Expiration object?
 
 The expiration object is used to set the expiration time of the cache.
+
 Because I want to be as close as possible to the PSR-16 and PSR-6 specifications, I have created an object that is responsible for setting the expiration time, this way I can reuse the same logic across all PSR-16 and PSR-6 implementations and I didn't need to create more methods that are not in the specifications.
 
 ### Common usage with the Pool cache
@@ -95,9 +96,10 @@ Because I want to be as close as possible to the PSR-16 and PSR-6 specifications
 ```php
 use ItalyStrap\Cache\Pool;
 use ItalyStrap\Cache\Expiration;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 $expiration = new Expiration();
 
 $pool = new Pool($driver, $expiration);
@@ -118,13 +120,20 @@ $special_data_to_save = $item->get();
 
 ### Common usage with the SimpleCache
 
+Only if you need to parse binary data (as for example image files) you can use the `BinaryCacheDecorator` class, but remember that if the file is more than 1MB it is better to not use this to save in the database.
+
+And because you are a good developer, you will not save binary data in the database, and you will use the `Transient` class instead of the `BinaryCacheDecorator` class.
+
 ```php
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 
-$cache = new SimpleCache($driver);
+$expiration = new Expiration();
+$cache = new SimpleCache($driver, $expiration);
 
 // Pay attention to `SimpleCacheInterface::get()` method because if there is no value will return `null` and not `false` as the WordPress Transient API does.
 if (null === ($special_data_to_save = $cache->get('special_data_to_save'))) {
@@ -141,9 +150,10 @@ if (null === ($special_data_to_save = $cache->get('special_data_to_save'))) {
 ```php
 use ItalyStrap\Cache\Pool;
 use ItalyStrap\Cache\Expiration;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 $expiration = new Expiration();
 
 $pool = new Pool($driver, $expiration);
@@ -163,12 +173,15 @@ $pool->getItem('special_data_to_save')->isHit(); // Return false
 ### Deleting cache with SimpleCache
 
 ```php
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 
-$cache = new SimpleCache($driver);
+$expiration = new Expiration();
+$cache = new SimpleCache($driver, $expiration);
 
 $cache->set('special_data_to_save', ['some-key' => 'some value'], 12 * HOUR_IN_SECONDS);
 
@@ -180,12 +193,12 @@ $cache->get('special_data_to_save'); // Return null
 ### Check cache exists with Pool
 
 ```php
-
 use ItalyStrap\Cache\Pool;
 use ItalyStrap\Cache\Expiration;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 $expiration = new Expiration();
     
 $pool = new Pool($driver, $expiration);
@@ -205,12 +218,15 @@ $pool->hasItem('expired_or_not_existent_value'); // Return false
 ### Check cache exists with SimpleCache
 
 ```php
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 
-$cache = new SimpleCache($driver);
+$expiration = new Expiration();
+$cache = new SimpleCache($driver, $expiration);
 
 $cache->set('special_data_to_save', ['some-key' => 'some value'], 12 * HOUR_IN_SECONDS);
 $cache->has('special_data_to_save'); // Return true
@@ -222,12 +238,15 @@ $cache->has('expired_or_not_existent_value'); // Return false
 ### Saving multiple cache with SimpleCache
 
 ```php
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 
-$cache = new SimpleCache($driver);
+$expiration = new Expiration();
+$cache = new SimpleCache($driver, $expiration);
 
 $values = [
     'key'       => 'value',
@@ -240,12 +259,15 @@ $cache->setMultiple($values, 12 * HOUR_IN_SECONDS); // Return bool
 ### Fetching multiple cache with SimpleCache
 
 ```php
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 
-$cache = new SimpleCache($driver);
+$expiration = new Expiration();
+$cache = new SimpleCache($driver, $expiration);
 
 $values = [
     'key'       => 'value',
@@ -259,12 +281,15 @@ $fetched_values = $cache->getMultiple(\array_keys($values), 'some default value'
 ### Deleting multiple cache with SimpleCache
 
 ```php
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 
-$cache = new SimpleCache($driver);
+$expiration = new Expiration();
+$cache = new SimpleCache($driver, $expiration);
 
 $values = [
     'key'       => 'value',
@@ -281,12 +306,15 @@ This method do not clear the entire WordPress cache, only the cache used by clie
 ::set() and ::setMultiple() methods.
 
 ```php
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 
-$cache = new SimpleCache($driver);
+$expiration = new Expiration();
+$cache = new SimpleCache($driver, $expiration);
 $cache->set('special_data_to_save',['some-key' => 'come value'], 12 * HOUR_IN_SECONDS);
 
 $values = [
@@ -308,12 +336,15 @@ Cache::clear() will flush 'special_data_to_save', 'key' and 'key2'.
 ## Other examples
 
 ```php
+use ItalyStrap\Cache\Expiration;
 use ItalyStrap\Cache\SimpleCache;
+use ItalyStrap\Storage\BinaryCacheDecorator;
 use ItalyStrap\Storage\Transient;
 
-$driver = new Transient(); // Or use new Cache()
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
 
-$cache = new SimpleCache($driver);
+$expiration = new Expiration();
+$cache = new SimpleCache($driver, $expiration);
 
 // Get any existing copy of our transient data
 if (false === ($special_data_to_save = $cache->get('special_data_to_save'))) {
@@ -330,6 +361,36 @@ if (!$cache->has('special_data_to_save')) {
      $cache->set('special_data_to_save', ['some-key' => 'some value'], 12 * HOUR_IN_SECONDS);
 }
 // Use the data like you would have normally...
+```
+
+You could also use a Bridge to use the \Psr\SimpleCache\CacheInterface and inject the \Psr\Cache\CacheItemPoolInterface
+
+```php
+use ItalyStrap\Cache\Pool;
+use ItalyStrap\Cache\Expiration;
+use ItalyStrap\Storage\BinaryCacheDecorator;
+use ItalyStrap\Storage\Transient;
+
+$driver = new BinaryCacheDecorator(new Transient()); // Or use new Cache()
+$expiration = new Expiration();
+    
+$pool = new Pool($driver, $expiration);
+
+$cache = new \ItalyStrap\Cache\SimpleCacheBridge($pool);
+// and use the $cache as \Psr\SimpleCache\CacheInterface
+```
+
+### Use the Factory to simplify the creation of the Cache
+
+```php
+use ItalyStrap\Cache\Factory;
+
+$cache = (new Factory())->makePool();
+$cache = (new Factory())->makePoolTransient();
+$cache = (new Factory())->makeSimpleCache();
+$cache = (new Factory())->makeSimpleCacheTransient();
+$cache = (new Factory())->makeSimpleCacheBridge();
+$cache = (new Factory())->makeSimpleCacheBridgeTransient();
 ```
 
 ## Contributing

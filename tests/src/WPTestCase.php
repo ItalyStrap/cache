@@ -7,11 +7,7 @@ use Codeception\TestCase\WPTestCase as WPUnit;
 
 class WPTestCase extends WPUnit
 {
-
-    /**
-     * @var \WPUnitTester
-     */
-    protected $tester;
+    protected \WPUnitTester $tester;
 
     protected string $cache_key;
 

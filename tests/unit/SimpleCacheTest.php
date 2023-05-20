@@ -3,14 +3,11 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\Unit;
 
-use ItalyStrap\Cache\Exceptions\SimpleCacheInvalidArgumentException;
+use ItalyStrap\Cache\Factory;
 use ItalyStrap\Cache\SimpleCache;
-use ItalyStrap\Storage\Cache;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\SimpleCacheTestTrait;
 use ItalyStrap\Tests\TestCase;
-use Prophecy\Argument;
-use Psr\SimpleCache\CacheInterface;
 
 class SimpleCacheTest extends TestCase
 {
@@ -65,9 +62,7 @@ class SimpleCacheTest extends TestCase
 
     public function makeInstance(): SimpleCache
     {
-        $sut = new SimpleCache(new Cache());
-        $this->assertInstanceOf(CacheInterface::class, $sut, '');
-        return $sut;
+        return (new Factory())->makeSimpleCache();
     }
 
     /**

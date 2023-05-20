@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ItalyStrap\Tests\WPUnit;
 
-use ItalyStrap\Cache\SimpleCacheBridge;
+use ItalyStrap\Cache\Factory;
 use ItalyStrap\Tests\CommonTrait;
 use ItalyStrap\Tests\SimpleCacheTestTrait;
 use ItalyStrap\Tests\WPTestCase;
@@ -62,8 +62,7 @@ class SimpleCacheBridgeTest extends WPTestCase
 
     private function makeInstance(): CacheInterface
     {
-        $sut = new SimpleCacheBridge((new PoolTest())->makeInstance());
-        return $sut;
+        return (new Factory())->makeSimpleCacheBridge();
     }
 
     /**
