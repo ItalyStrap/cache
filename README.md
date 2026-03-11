@@ -19,6 +19,7 @@ PSR-16 & PSR-6 Cache implementations for WordPress transient and cache the OOP w
 * [Advanced Usage](#advanced-usage)
 * [Contributing](#contributing)
 * [License](#license)
+* [Credits](#credits)
 
 ## Installation
 
